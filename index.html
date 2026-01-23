@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Инструкция — Drag & Drop</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Подключаем шрифты -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #cfdbea;
+      --card: #ffffff;
+      --accent: #2b6cff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --radius: 20px;
+      --shadow: 0 10px 30px rgba(0,0,0,0.08);
+      --ok: #16a34a;
+      --bad: #dc2626;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 64px 24px 96px;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Noto Sans', sans-serif;
+      font-weight: 900;
+    }
+
+    h1 { 
+      font-size: 40px; 
+      margin-bottom: 24px; 
+      font-weight: 900;
+    }
+    
+    h2 {
+      font-size: 32px;
+      margin: 80px 0 24px;
+      font-weight: 800;
+    }
+    
+    h3 {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    
+    p { 
+      margin: 0 0 16px; 
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* ===== ГАЛЕРЕЯ ===== */
+    .gallery {
+      margin-top: 32px;
+      position: relative;
+      width: 100%;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .gallery-container {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #f3f4f6;
+      height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gallery-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .gallery-img.active {
+      display: block;
+    }
+
+    .gallery-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 20px;
+      color: var(--accent);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: all 0.2s ease;
+      z-index: 10;
+    }
+
+    .gallery-btn:hover {
+      background: white;
+      transform: translateY(-50%) scale(1.05);
+    }
+
+    .gallery-btn.prev {
+      top: 350px;
+      left: 16px;
+    }
+
+    .gallery-btn.next {
+      top: 350px;
+      right: 16px;
+    }
+
+    .gallery-dots {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .gallery-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #d1d5db;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      transition: background 0.3s ease;
+    }
+
+    .gallery-dot.active {
+      background: var(--accent);
+    }
+
+    /* ===== MATCHER ===== */
+
+    .matcher {
+      margin-top: 32px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+
+    .column {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .column.tools-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .column h3 {
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    /* ===== GENERATIONS ===== */
+
+    .gen-block {
+      margin-bottom: 20px;
+    }
+
+    .gen-title {
+      display: block;
+      text-align: center;
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-family: 'Noto Sans', sans-serif;
+      font-weight: 700;
+    }
+
+    .generation {
+      border: 2px dashed #e5e7eb;
+      border-radius: 16px;
+      height: 72px; /* ФИКСИРОВАННАЯ ВЫСОТА */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color .2s, background .2s;
+    }
+
+    .generation.dragover {
+      border-color: var(--accent);
+      background: #eef3ff;
+    }
+
+    /* ===== TOOLS ===== */
+
+    .tool {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      height: 48px;
+      margin-top: 12px;
+      margin-bottom: 12px;
+      cursor: grab;
+      user-select: none;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 94%;
+      text-align: center;
+      transition: transform .25s ease, opacity .25s ease;
+    }
+
+    .tool:active {
+      cursor: grabbing;
+    }
+
+    .tool.assigned {
+      background: #eef2ff;
+      border-color: var(--accent);
+    }
+
+    /* ===== CONTROLS ===== */
+
+    .controls {
+      margin-top: 24px;
+      display: flex;
+      gap: 16px;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: opacity .2s, transform .1s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .check {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .check:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .reset {
+      background: #e5e7eb;
+    }
+
+    .result {
+      margin-top: 16px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+    }
+
+    @media (max-width: 800px) {
+      .matcher {
+        grid-template-columns: 1fr;
+      }
+      .gallery-container {
+        height: 300px;
+      }
+    }
+
+    :root {
+      --bg: #cfdbea;
+      --card: #ffffff;
+      --accent: #2b6cff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --radius: 20px;
+      --shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+      /* ===== HIGHLIGHT БЛОКИ С ИКОНКАМИ ===== */
+  .highlight-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+  .card.highlight {
+      background: #0C73FE !important; /* Фиксированный цвет */
+      padding: 20px 24px 20px 64px; /* Больше слева для иконки */
+      position: relative;
+      color: #ffffff; /* Белый текст для контраста */
+      display: flex;
+      align-items: flex-start;
+  }
+
+  /* Иконка в левом верхнем углу */
+  .highlight-icon {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 32px;
+      height: 32px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+  }
+
+  /* Контент highlight блока */
+  .highlight-content {
+      flex: 1;
+  }
+
+  /* Текст внутри highlight */
+  .card.highlight strong {
+      color: #ffffff;
+      font-weight: 700;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Для мобильных */
+  @media (max-width: 768px) {
+      .card.highlight {
+          padding: 16px 20px 16px 56px;
+      }
+      
+      .highlight-icon {
+          top: 16px;
+          left: 16px;
+          width: 28px;
+          height: 28px;
+          font-size: 16px;
+      }
+  }
+    /* Карточки */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-top: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .card + .card {
+      margin-top: 24px;
+    }
+    .text-block {
+      margin-top: 24px;
+      line-height: 1.6;
+    }   
+
+    /* Инфо-блок */
+    .highlight {
+      background: #eef3ff;
+      border-radius: 16px;
+      padding: 20px 24px;
+      font-size: 16px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .highlight strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* Сетка скриншотов */
+    .screens {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-top: 32px;
+    }
+
+    .screen {
+      background: #f3f4f6;
+      border-radius: 16px;
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Поколения */
+    .generations {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+      margin-top: 32px;
+    }
+
+    .gen-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .gen-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-family: 'Noto Sans', sans-serif;
+    }
+
+    /* Соединялка */
+    .matcher {
+      margin-top: 40px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+
+    .matcher-column {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .matcher h4 {
+      margin-bottom: 16px;
+    }
+
+    .item {
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      background: #fafafa;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-family: 'Inter', sans-serif;
+    }
+
+    footer {
+      margin-top: 96px;
+      font-size: 14px;
+      color: var(--muted);
+      font-family: 'Inter', sans-serif;
+    }
+
+    @media (max-width: 720px) {
+      h1 {
+        font-size: 32px;
+      }
+
+      h2 {
+        font-size: 26px;
+      }
+
+      .matcher {
+        grid-template-columns: 1fr;
+      }
+    }
+
+/* ===== ИНТЕРАКТИВНАЯ КАРТИНКА С КРУЖКАМИ ===== */
+.interactive-image-container {
+    margin: 24px 0 32px 0;
+    position: relative;
+}
+
+.rule-image-container {
+    border-radius: 16px;
+    overflow: hidden;
+    background: #f3f4f6;
+    box-shadow: var(--shadow);
+    position: relative;
+}
+
+.rule-image {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    display: block;
+}
+
+.image-caption {
+    padding: 12px 16px;
+    background: rgba(70, 70, 70, 0.7);
+    font-size: 14px;
+    color: white;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+}
+
+/* ===== ИНТЕРАКТИВНЫЕ КРУЖКИ ===== */
+.interactive-dots {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 400px;
+}
+
+.dot {
+    position: absolute;
+    cursor: pointer;
+    z-index: 10;
+    transition: transform 0.3s ease;
+}
+
+.dot:hover {
+    transform: scale(1.1);
+}
+
+.dot-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #0C73FE;
+    border: 3px solid white;
+    box-shadow: 0 0 0 2px #0656FE, 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.dot-circle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+    background: white;
+    border-radius: 50%;
+}
+
+.dot.active .dot-circle {
+    background: #FA742D;
+    transform: scale(1.2);
+    box-shadow: 0 0 0 3px #F25122, 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* ===== ВЫПАДАЮЩИЕ ОКОШКИ ===== */
+.tooltip {
+    position: absolute;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-10px);
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    width: 260px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 20;
+}
+
+.tooltip::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 12px;
+    height: 12px;
+    background: white;
+}
+
+.dot.active .tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+.tooltip-title {
+    font-family: 'Noto Sans', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    color: #0656FE;
+    margin-bottom: 8px;
+}
+
+.tooltip-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text);
+}
+
+/* Для мобильных устройств */
+@media (max-width: 768px) {
+    .rule-image {
+        height: 300px;
+    }
+    
+    .interactive-dots {
+        height: 300px;
+    }
+    
+    .dot-circle {
+        width: 26px;
+        height: 26px;
+    }
+    
+    .tooltip {
+        width: 220px;
+        padding: 12px;
+    }
+    
+    .tooltip-title {
+        font-size: 14px;
+    }
+    
+    .tooltip-text {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .rule-image {
+        height: 250px;
+    }
+    
+    .interactive-dots {
+        height: 250px;
+    }
+    
+    .dot-circle {
+        width: 22px;
+        height: 22px;
+        border-width: 2px;
+    }
+    
+    .tooltip {
+        width: 180px;
+    }
+}
+
+    /* Для мобильных устройств */
+    @media (max-width: 768px) {
+        .rule-image {
+            height: 200px;
+        }
+    }
+
+    body {
+        margin: 0;
+        font-family: 'Inter', sans-serif;
+        /* Тройной вертикальный градиент с плавными переходами */
+        background: 
+            /* Левый градиент */
+            linear-gradient(to bottom, 
+                #0C73FE 0%,      /* Синий сверху */
+                #6EBAFF 50%,     /* Голубой в середине */
+                #ffffff 100%     /* Белый снизу */
+            ) left / calc(50% - 600px) 100% no-repeat,
+            
+            /* Правый градиент */
+            linear-gradient(to bottom, 
+                #0C73FE 0%,
+                #6EBAFF 50%,
+                #ffffff 100%
+            ) right / calc(50% - 600px) 100% no-repeat,
+            
+            /* Белый фон в центре */
+            #ffffff center / 1200px 100% no-repeat;
+        
+        background-attachment: fixed;
+        color: var(--text);
+        min-height: 100vh;
+    }
+
+    /* ===== ОСНОВНОЙ КОНТЕЙНЕР ===== */
+    .container {
+        max-width: 800px; /* Соответствует ширине белой полосы */
+        margin: 0 auto;
+        padding: 64px 24px 96px;
+        /* Контейнер прозрачный - через него виден градиент body */
+        background-color: transparent;
+    }
+
+    /* ===== ВТОРОЙ КОНТЕЙНЕР В КОНЦЕ (для Drag&Drop) ===== */
+    .container:last-of-type {
+        padding-top: 40px; /* Меньше отступ сверху, так как это продолжение */
+    }
+    .card,
+    .highlight,
+    .gen-card,
+    .column,
+    .gallery-container,
+    .screen,
+    .generation,
+    .tool,
+    .matcher-column {
+        background-color: #ffffff !important;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+    }
+
+    /* ===== ОСОБЫЙ СЛУЧАЙ ДЛЯ КАРТОЧЕК ПОКОЛЕНИЙ ===== */
+    .gen-card {
+        background: var(--card) !important;
+    }
+
+    /* ===== ОСОБЫЙ СЛУЧАЙ ДЛЯ ВЫДЕЛЕННЫХ БЛОКОВ ===== */
+    .highlight {
+        background: #eef3ff !important;
+    }
+  </style>
+</head>
+<body>
+    <div class="container">
+
+    <h1>Инструкция</h1>
+
+    <h2>Правило 1: Вызывай эмоции</h2>
+
+    <div class="text-block">
+      <p>
+        Мы постим, что хотим. В многоступенчатой системе проверок много времени
+        уходит на согласование, идея становится стерильной, она теряет в актуальности.
+      </p>
+      <p>
+        У нас не так: наша директор уверена — согласования убивают креатив.
+        Контент-плана нет. Зато есть креативные штурмы, где мы придумываем и
+        докручиваем свежие идеи, опираясь на тренды.
+      </p>
+      <p>
+        Мы постоянно в инфополе и стараемся, чтобы наши приколы не забывались из-за информационного шума. Билеты покупают только пару раз в год, а ассоциация с нами должна возникнуть в любой момент.
+      </p>
+      <p>
+        Более того, посты должны быть такими, чтобы ими хотелось делиться с друзьями.
+        Для нас это важно, потому что нужно повышать узнаваемость, а не показатели продаж.
+      </p>
+    </div>
+
+  <!-- ВТОРОЙ HIGHLIGHT БЛОК -->
+  <div class="card highlight">
+    <div class="highlight-icon">⚠️</div>
+    <div class="highlight-content">
+      Важно помнить, что мемы и новости не уходят на выходные —
+      работать придётся много и из самых разнообразных мест!
+    </div>
+  </div>
+
+    <!-- ГАЛЕРЕЯ -->
+    <div class="gallery">
+      <div class="gallery-container">
+        <img src="screen1.PNG" alt="Пример контента 1" class="gallery-img active">
+        <img src="screen2.PNG" alt="Пример контента 2" class="gallery-img">
+        <img src="screen3.PNG" alt="Пример контента 3" class="gallery-img">
+        <img src="screen4.PNG" alt="Пример контента 4" class="gallery-img">
+        
+        <button class="gallery-btn prev">←</button>
+        <button class="gallery-btn next">→</button>
+      </div>
+      
+      <div class="gallery-dots">
+        <button class="gallery-dot active" data-index="0"></button>
+        <button class="gallery-dot" data-index="1"></button>
+        <button class="gallery-dot" data-index="2"></button>
+        <button class="gallery-dot" data-index="3"></button>
+      </div>
+    </div>
+
+
+    <div class="text-block">
+      <p>
+        Реальные события продвигают наш бренд. Но на этом работа не заканчивается —
+        нужно изучить, как аудитория откликается на нашу интерпретацию реальности,
+        через исследования.
+      </p>
+    </div>
+
+  <!-- ПЕРВЫЙ HIGHLIGHT БЛОК -->
+  <div class="card highlight">
+    <div class="highlight-icon">💡</div>
+    <div class="highlight-content">
+      Один из инструментов, которые мы используем — <strong>Ньюсджекинг (newsjacking).</strong>
+      Наша команда всегда в курсе новостей, проводит много времени в поисках
+      информации и готова моментально реагировать на инфоповоды,
+      вплетая туда юмор.
+    </div>
+  </div>
+
+    <h2>Правило 2: Будь непредсказуемым</h2>
+
+    <div class="text-block">
+      <p>
+        У нас 15 каналов в 11 соцсетях. Мы есть в Telegram, VK, TikTok, Instagram,
+        X, Viber и других. Важно учитывать, что везде разная аудитория.
+      </p>
+      <p>
+        В одноклассниках поколение Х и бэби-бумеры, для них у нас есть специальная рубрика «Хахасейлс» — анекдоты с Самолешей. А еще для этих поколений мы хотим создать открытки в WhatsApp. 
+      </p>
+      <p>
+        В инсте и тиктоке сидят миллениалы и зумеры, им заходят рилсы, мемы, постирония. 
+Прилагаю тебе памятку, чтобы точно не запутаться:
+      </p>
+    </div>
+
+    <!-- ПОЛЕ ДЛЯ КАРТИНКИ С ИНТЕРАКТИВНЫМИ КРУЖОЧКАМИ -->
+    <div class="interactive-image-container">
+      <!-- Основное изображение -->
+      <div class="rule-image-container">
+        <img src="POKOLENIA.PNG" alt="Поколения и их предпочтения" class="rule-image">
+        <div class="image-caption">Кликните на кружки, чтобы узнать о поколениях</div>
+      </div>
+      
+      <!-- Интерактивные кружки -->
+      <div class="interactive-dots">
+        <!-- Кружок 1: Бэби-бумеры -->
+        <div class="dot" style="top: 25%; left: 5%;" data-gen="babyboomer">
+          <div class="dot-circle"></div>
+          <div class="tooltip">
+            <div class="tooltip-title">Бэби-бумеры (1944–1967)</div>
+            <div class="tooltip-text">предпочитают традиционные форматы: телевидение, радио, печатные издания. Читают новости, из соцсетей сидят в Одноклассниках и Вконтакте.</div>
+          </div>
+        </div>
+        
+        <!-- Кружок 2: Поколение X -->
+        <div class="dot" style="top: 10%; left: 35%;" data-gen="genx">
+          <div class="dot-circle"></div>
+          <div class="tooltip">
+            <div class="tooltip-title">Поколение X (бумеры) (1968–1983)</div>
+            <div class="tooltip-text">любят выгоду: скидки, программы лояльности. Им нужны чёткие инструкции, понятные алгоритмы действий, подробная информация о покупках. Доверяют рекламе с известными людьми.</div>
+          </div>
+        </div>
+        
+        <!-- Кружок 3: Миллениалы -->
+        <div class="dot" style="top: 22%; left: 92%;" data-gen="millennial">
+          <div class="dot-circle"></div>
+          <div class="tooltip">
+            <div class="tooltip-title">Y Миллениалы (1984–2000)</div>
+            <div class="tooltip-text">любят геймифицированные посты, квизы, розыгрыши — разные интерактивы.</div>
+          </div>
+        </div>
+        
+        <!-- Кружок 4: Зумеры -->
+        <div class="dot" style="top: 85%; left: 23%;" data-gen="zoomer">
+          <div class="dot-circle"></div>
+          <div class="tooltip">
+            <div class="tooltip-title">Z Зумеры (2000–2011)</div>
+            <div class="tooltip-text">потребляют быстрый контент в формате клипов, фото. Им сложно сосредоточиться на длинных текстах. Как и миллениалы, любят интерактивный контент. Им важно чувствовать себя частью чего-то.</div>
+          </div>
+        </div>
+        
+        <!-- Кружок 5: Альфа -->
+        <div class="dot" style="top: 85%; left: 76%;" data-gen="alpha">
+          <div class="dot-circle"></div>
+          <div class="tooltip">
+            <div class="tooltip-title">Альфа (с 2011)</div>
+            <div class="tooltip-text">зависают в шортсах и рилсах, используют видео для прослушивания музыки. Любят развлекательный контент. Не доверяют скрытой рекламе, считывают неискренность. Общаются через мобильные или компьютерные игры.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <h2>#Попробуй сам</h2>
+
+  <p>
+    А теперь попробуй сам: тебе надо продвинуть товар для путешествий среди разных поколений, какой инструмент используешь?
+  </p>
+  <p>Перетащи инструмент к поколению. Кнопка «Проверить» станет доступной,
+    когда будут распределены все инструменты.
+  </p>
+
+  <div class="matcher">
+
+    <!-- Поколения -->
+    <div class="column">
+      <h3>Поколения</h3>
+
+      <div class="gen-block">
+        <span class="gen-title">Альфа</span>
+        <div class="generation" data-gen="alpha"></div>
+      </div>
+
+      <div class="gen-block">
+        <span class="gen-title">Зумеры</span>
+        <div class="generation" data-gen="zoomer"></div>
+      </div>
+
+      <div class="gen-block">
+        <span class="gen-title">Миллениалы</span>
+        <div class="generation" data-gen="millennial"></div>
+      </div>
+
+      <div class="gen-block">
+        <span class="gen-title">Бумеры</span>
+        <div class="generation" data-gen="boomer"></div>
+      </div>
+
+      <div class="gen-block">
+        <span class="gen-title">Бэби-бумеры</span>
+        <div class="generation" data-gen="babyboomer"></div>
+      </div>
+    </div>
+
+    <!-- Инструменты -->
+    <div class="column tools-column">
+      <h3>Инструменты</h3>
+
+      <div class="tool" draggable="true" data-tool="game">Мини-игра</div>
+      <div class="tool" draggable="true" data-tool="youtube">Реклама на YouTube</div>
+      <div class="tool" draggable="true" data-tool="blogger">TV шоу со звездой</div>
+      <div class="tool" draggable="true" data-tool="clips">Вертикальные клипы</div>
+      <div class="tool" draggable="true" data-tool="radio">Реклама на радио</div>
+    </div>
+
+  </div>
+
+  <div class="controls">
+    <button class="check" disabled>Проверить</button>
+    <button class="reset">Сбросить</button>
+  </div>
+
+<p class="result-text" style="display: none; margin-top: 24px;">
+  Как ты понимаешь, у нас нужно уметь делать всё: монтировать ролики, делать мемы, придумывать забавные твиты, которые потом разлетятся по всем соцсетям, писать статьи в наше медиа «Пассажир» и даже делать локальный контент для регионов. 
+  И, конечно, писать громкие заголовки и интересные посты. Для этого попробуй использовать еще один инструмент — вординг.
+</p>
+</div>
+
+<script>
+  // ГАЛЕРЕЯ
+  const galleryImages = document.querySelectorAll('.gallery-img');
+  const galleryDots = document.querySelectorAll('.gallery-dot');
+  const prevBtn = document.querySelector('.gallery-btn.prev');
+  const nextBtn = document.querySelector('.gallery-btn.next');
+  let currentIndex = 0;
+
+  function updateGallery() {
+    galleryImages.forEach((img, index) => {
+      img.classList.toggle('active', index === currentIndex);
+    });
+    
+    galleryDots.forEach((dot, index) => {
+      dot.classList.toggle('active', index === currentIndex);
+    });
+  }
+
+  function nextSlide() {
+    currentIndex = (currentIndex + 1) % galleryImages.length;
+    updateGallery();
+  }
+
+  function prevSlide() {
+    currentIndex = (currentIndex - 1 + galleryImages.length) % galleryImages.length;
+    updateGallery();
+  }
+
+  nextBtn.addEventListener('click', nextSlide);
+  prevBtn.addEventListener('click', prevSlide);
+
+  galleryDots.forEach(dot => {
+    dot.addEventListener('click', () => {
+      currentIndex = parseInt(dot.dataset.index);
+      updateGallery();
+    });
+  });
+
+  // Автопереключение каждые 5 секунд
+  setInterval(nextSlide, 5000);
+
+  // DRAG & DROP MATCHER
+  const tools = document.querySelectorAll('.tool');
+  const generations = document.querySelectorAll('.generation');
+  const result = document.querySelector('.result');
+  const checkBtn = document.querySelector('.check');
+  const toolsColumn = document.querySelector('.tools-column');
+
+  let draggedTool = null;
+
+  const correctMatches = {
+    alpha: "game",
+    zoomer: "youtube",
+    millennial: "blogger",
+    boomer: "clips",
+    babyboomer: "radio"
+  };
+
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
+  function updateCheckButtonState() {
+    const assigned = document.querySelectorAll('.tool.assigned').length;
+    checkBtn.disabled = assigned !== tools.length;
+  }
+
+  tools.forEach(tool => {
+    tool.addEventListener('dragstart', () => draggedTool = tool);
+  });
+
+  generations.forEach(gen => {
+    gen.addEventListener('dragover', e => {
+      e.preventDefault();
+      gen.classList.add('dragover');
+    });
+
+    gen.addEventListener('dragleave', () => {
+      gen.classList.remove('dragover');
+    });
+
+    gen.addEventListener('drop', () => {
+      gen.classList.remove('dragover');
+      if (!draggedTool) return;
+
+      generations.forEach(g => {
+        if (g.contains(draggedTool)) g.innerHTML = '';
+      });
+
+      draggedTool.classList.add('assigned');
+      gen.appendChild(draggedTool);
+      draggedTool = null;
+
+      updateCheckButtonState();
+    });
+  });
+
+  checkBtn.addEventListener('click', () => {
+    let score = 0;
+    const total = Object.keys(correctMatches).length;
+
+    generations.forEach(gen => {
+      const tool = gen.querySelector('.tool');
+      if (!tool) return;
+
+      const isCorrect =
+        correctMatches[gen.dataset.gen] === tool.dataset.tool;
+
+      gen.style.borderColor = isCorrect
+        ? 'var(--ok)'
+        : 'var(--bad)';
+
+      if (isCorrect) score++;
+    });
+
+  if (score === total) {
+    document.querySelector('.result-text').style.display = 'block';
+    result.textContent = ''; // Очищаем старое сообщение
+  } else {
+    document.querySelector('.result-text').style.display = 'none';
+    result.textContent = 'Пока не совсем верно, попробуй ещё разок!';
+  }
+  });
+
+  document.querySelector('.reset').addEventListener('click', () => {
+    const shuffled = shuffle(Array.from(tools));
+
+    shuffled.forEach((tool, i) => {
+      tool.classList.remove('assigned');
+      tool.style.opacity = '0';
+      setTimeout(() => {
+        toolsColumn.appendChild(tool);
+        tool.style.opacity = '1';
+      }, i * 60);
+    });
+    generations.forEach(gen => gen.style.borderColor = '#e5e7eb');
+    result.textContent = '';
+    checkBtn.disabled = true;
+  });
+
+  // Интерактивные кружки на картинке
+  document.addEventListener('DOMContentLoaded', function() {
+      const dots = document.querySelectorAll('.dot');
+      let activeDot = null;
+      
+      dots.forEach(dot => {
+          dot.addEventListener('click', function(e) {
+              e.stopPropagation();
+              
+              // Закрываем предыдущий активный кружок
+              if (activeDot && activeDot !== this) {
+                  activeDot.classList.remove('active');
+              }
+              
+              // Переключаем текущий кружок
+              this.classList.toggle('active');
+              
+              // Обновляем активный кружок
+              if (this.classList.contains('active')) {
+                  activeDot = this;
+              } else {
+                  activeDot = null;
+              }
+          });
+      });
+      
+      // Закрываем все подсказки при клике вне кружков
+      document.addEventListener('click', function() {
+          if (activeDot) {
+              activeDot.classList.remove('active');
+              activeDot = null;
+          }
+      });
+      
+      // Останавливаем всплытие события при клике на подсказку
+      document.querySelectorAll('.tooltip').forEach(tooltip => {
+          tooltip.addEventListener('click', function(e) {
+              e.stopPropagation();
+          });
+      });
+  });
+</script>
+
+</body>
+</html>
