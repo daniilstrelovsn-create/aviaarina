@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест: Готовы ли вы стать SMM-щиком Aviasales?</title>
+    <style>
+        :root {
+            --aviasales-blue: #0C73FE;
+            --aviasales-light-blue: #6EBAFF;
+            --bg-color: #F5F7FA;
+            --card-bg: #FFFFFF;
+            --text-dark: #1A1A1A;
+            --text-gray: #666666;
+            --text-light: #999999;
+            --border-color: #E1E8F0;
+            --correct-color: #10B981;
+            --incorrect-color: #EF4444;
+            --accent-color: #FF6B35;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0C73FE 0%, #6EBAFF 50%, #FFFFFF 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-dark);
+        }
+
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        /* Шапка */
+        .test-header {
+            background: linear-gradient(135deg, var(--aviasales-blue), var(--aviasales-light-blue));
+            padding: 40px;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+
+        .test-header h1 {
+            font-size: 32px;
+            margin-bottom: 16px;
+            font-weight: 900;
+        }
+
+        .test-header p {
+            font-size: 18px;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        .company-logo {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* Прогресс бар */
+        .progress-container {
+            padding: 20px 40px;
+            background: var(--bg-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #E5E7EB;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--aviasales-light-blue), var(--aviasales-blue));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        /* Область вопросов - ФИКСИРОВАННАЯ ВЫСОТА */
+        .question-area {
+            padding: 40px;
+            min-height: 420px; /* Фиксированная высота для предотвращения дерганий */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .question-number {
+            font-size: 14px;
+            color: var(--text-gray);
+            margin-bottom: 8px;
+            font-weight: 500;
+            flex-shrink: 0; /* Не сжимается */
+        }
+
+        /* Контейнер для текста вопроса с фиксированной высотой */
+        .question-box {
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.4;
+            margin-bottom: 32px;
+            min-height: 56px; /* Примерно 2 строки текста */
+            display: flex;
+            align-items: center; /* Центрируем текст по вертикали */
+            flex-shrink: 0; /* Не сжимается */
+        }
+
+        .question-text {
+            /* Текст внутри контейнера */
+        }
+
+        /* Варианты ответов */
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 20px; /* Уменьшен отступ, так как кнопка теперь внизу контейнера */
+            flex-grow: 1; /* Занимает всё доступное пространство */
+        }
+
+        .option {
+            background: var(--bg-color);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .option:hover {
+            border-color: var(--aviasales-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(12, 115, 254, 0.1);
+        }
+
+        .option.selected {
+            border-color: var(--aviasales-blue);
+            background: rgba(12, 115, 254, 0.05);
+        }
+
+        .option.correct {
+            border-color: var(--correct-color);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .option.incorrect {
+            border-color: var(--incorrect-color);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .option-letter {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .option.selected .option-letter {
+            background: var(--aviasales-blue);
+            color: white;
+            border-color: var(--aviasales-blue);
+        }
+
+        .option.correct .option-letter {
+            background: var(--correct-color);
+            color: white;
+            border-color: var(--correct-color);
+        }
+
+        .option.incorrect .option-letter {
+            background: var(--incorrect-color);
+            color: white;
+            border-color: var(--incorrect-color);
+        }
+
+        .option-text {
+            font-size: 16px;
+            line-height: 1.5;
+            flex: 1;
+        }
+
+        .correct-marker {
+            color: var(--correct-color);
+            font-weight: 700;
+            margin-left: 8px;
+            display: none;
+        }
+
+        .option.correct .correct-marker {
+            display: inline;
+        }
+
+        /* Кнопки управления - теперь внутри question-area */
+        .buttons-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            margin-top: auto; /* Прижимаем к низу */
+            flex-shrink: 0; /* Не сжимается */
+        }
+
+        .btn {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: var(--aviasales-blue);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #0056CC;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(12, 115, 254, 0.3);
+        }
+
+        .btn-primary:disabled {
+            background: var(--text-light);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            opacity: 0.6;
+        }
+
+        .btn-secondary {
+            background: var(--bg-color);
+            color: var(--text-gray);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #E5E7EB;
+            border-color: var(--text-gray);
+        }
+
+        .btn-secondary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Результат */
+        .result-container {
+            padding: 60px 40px;
+            text-align: center;
+            display: none;
+        }
+
+        .result-score {
+            font-size: 48px;
+            font-weight: 900;
+            color: var(--aviasales-blue);
+            margin-bottom: 20px;
+        }
+
+        .result-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .result-text {
+            font-size: 18px;
+            color: var(--text-gray);
+            line-height: 1.6;
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .result-bonus {
+            background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 40px;
+            border: 2px solid #FBBF24;
+        }
+
+        .result-bonus h3 {
+            color: #D97706;
+            margin-bottom: 16px;
+            font-size: 24px;
+        }
+
+        .result-bonus p {
+            color: #92400E;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .meme-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Подсказка о правильных ответах */
+        .hint {
+            background: rgba(255, 107, 53, 0.1);
+            border: 2px dashed var(--accent-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 0 40px 24px;
+            text-align: center;
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question-area, .result-container {
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .test-header {
+                padding: 30px 20px;
+            }
+            
+            .test-header h1 {
+                font-size: 24px;
+            }
+            
+            .question-area {
+                padding: 30px 20px;
+                min-height: 380px; /* Чуть меньше на мобильных */
+            }
+            
+            .buttons-container {
+                padding: 20px 0 0;
+                flex-direction: column;
+            }
+            
+            .progress-container {
+                padding: 20px;
+            }
+            
+            .option {
+                padding: 16px;
+            }
+            
+            .option-letter {
+                width: 36px;
+                height: 36px;
+                min-width: 36px;
+            }
+            
+            .hint {
+                margin: 0 20px 20px;
+            }
+            
+            .question-box {
+                font-size: 18px;
+                min-height: 50px;
+            }
+        }
+
+        /* Стили для правильных ответов в тексте */
+        .correct-answer {
+            background: linear-gradient(120deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+    </style>
+    <!-- Подключаем шрифт Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="test-container">
+        <!-- Шапка теста -->
+        <div class="test-header">
+            <!-- <div class="company-logo">✈️ Aviasales</div> -->
+            <h1>Тест: готовы ли вы стать SMM-щиком Aviasales?</h1>
+            <p>Поздравляем! Вы узнали крутые фишки маркетинга, теперь знаете, что мы работаем на узнаваемость, а не на продажи, что предпочитаем юмор как инструмент к доверию, что вести все социальные сети можно и даже нужно, и можете использовать это всё в работе.</p>
+        </div>
+        
+        
+        <!-- Прогресс бар -->
+        <div class="progress-container">
+            <div class="progress-text">
+                <span id="progressText">Вопрос 1 из 7</span>
+                <span id="scoreText">0/7</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+        
+        <!-- Область вопросов -->
+        <div class="question-area" id="questionArea">
+            <div class="question-number" id="questionNumber">Вопрос 1 из 7</div>
+            <div class="question-box">
+                <div class="question-text" id="questionText"></div>
+            </div>
+            
+            <div class="options-container" id="optionsContainer">
+                <!-- Варианты ответов будут добавляться динамически -->
+            </div>
+            
+            <!-- Кнопки управления теперь внутри question-area -->
+            <div class="buttons-container">
+                <button class="btn btn-secondary" id="prevBtn" disabled>← Назад</button>
+                <button class="btn btn-primary" id="nextBtn" disabled>Следующий вопрос →</button>
+            </div>
+        </div>
+        
+        <!-- Результат теста -->
+        <div class="result-container" id="resultContainer">
+            <div class="result-score" id="finalScore">0/7</div>
+            <h2 class="result-title">Поздравляем с завершением теста!</h2>
+            <p class="result-text" id="resultMessage"></p>
+            
+            <!-- ЗДЕСЬ ИЗМЕНЕНИЕ: Кнопка теперь ведёт на hr-chat-after.html -->
+            <a href="hr-chat-after.html" class="btn btn-primary" id="realityBtn">Вернуться в реальность</a>
+            
+            <!-- Бонусный мем -->
+            <div class="result-bonus" id="resultBonus">
+                <h3>🎁 Лови бонус!</h3>
+                <p>Любимый мем SMM-щика Aviasales, Егора Малинина:</p>
+                <div class="meme-container">
+                    <!-- Вставьте свою SVG картинку с мемом здесь -->
+                    <img src="meme.svg" alt="Мем" width="200" height="200">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Данные теста
+        const questions = [
+            {
+                question: "Какая главная цель контента «Авиасейлс»?",
+                options: [
+                    { text: "Поднять продажи билетов", correct: false },
+                    { text: "Повысить вовлечённость в соц. сетях", correct: false },
+                    { text: "Увеличить узнаваемость бренда", correct: true },
+                    { text: "Приподнять настроение перед покупкой", correct: false }
+                ]
+            },
+            {
+                question: "Что такое ньюсджекинг в понимании «Авиасейлс»?",
+                options: [
+                    { text: "Продвижение через упоминания в СМИ", correct: false },
+                    { text: "Анализ трендов раз в квартал", correct: false },
+                    { text: "Быстрая реакция на актуальные события с юмором", correct: true },
+                    { text: "Создание фейковых новостей для виральности", correct: false }
+                ]
+            },
+            {
+                question: "Почему в контенте «Авиасейлс» минимизируют переходы между страницами?",
+                options: [
+                    { text: "Лишние клики снижают доступность и мотивацию", correct: true },
+                    { text: "Так снижается нагрузка на серверы", correct: false },
+                    { text: "Чтобы всё выглядело компактно и красиво", correct: false },
+                    { text: "Из-за требований об обработке персональных данных", correct: false }
+                ]
+            },
+            {
+                question: "Почему «Авиасейлс» никого не раздражает, несмотря на частый контент?",
+                options: [
+                    { text: "Контент выходит в определённое время", correct: false },
+                    { text: "Пользователи получают бонусы за лайки", correct: false },
+                    { text: "Используются определённые шрифты и цвета", correct: false },
+                    { text: "Весь контент неожиданный и интересный", correct: true }
+                ]
+            },
+            {
+                question: "Почему в «Авиасейлс» нет согласований?",
+                options: [
+                    { text: "Для сохранения дружеской атмосферы в компании", correct: false },
+                    { text: "Из-за них снижается креативность", correct: true },
+                    { text: "Нет компетентных людей на эту задачу", correct: false },
+                    { text: "Невозможно просмотреть такое количество контента", correct: false }
+                ]
+            },
+            {
+                question: "Что такое «вординг» в контексте «Авиасейлс»?",
+                options: [
+                    { text: "Подбор слов для цепляющих заголовков", correct: true },
+                    { text: "Генерация текстов с помощью ИИ", correct: false },
+                    { text: "Перевод постов на разные языки", correct: false },
+                    { text: "Метод проверки орфографии в соц. сетях", correct: false }
+                ]
+            },
+            {
+                question: "Какие качества важны для сотрудника «Авиасейлс»?",
+                options: [
+                    { text: "Опыт работы в авиакомпаниях", correct: false },
+                    { text: "Умение писать аналитические отчёты", correct: false },
+                    { text: "Строгое соблюдение графика и дресс-кода", correct: false },
+                    { text: "Открытость, чувство юмора и креативность", correct: true }
+                ]
+            }
+        ];
+
+        // Элементы DOM
+        const questionArea = document.getElementById('questionArea');
+        const resultContainer = document.getElementById('resultContainer');
+        const questionNumber = document.getElementById('questionNumber');
+        const questionText = document.getElementById('questionText');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const progressText = document.getElementById('progressText');
+        const scoreText = document.getElementById('scoreText');
+        const progressFill = document.getElementById('progressFill');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const realityBtn = document.getElementById('realityBtn');
+        const finalScore = document.getElementById('finalScore');
+        const resultMessage = document.getElementById('resultMessage');
+
+        // Состояние теста
+        let currentQuestion = 0;
+        let userAnswers = new Array(questions.length).fill(null);
+        let score = 0;
+        let testFinished = false;
+
+        // Буквы для вариантов ответов
+        const optionLetters = ['А', 'Б', 'В', 'Г'];
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            showQuestion(currentQuestion);
+            updateProgress();
+        });
+
+        // Показать вопрос
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Обновляем номер вопроса
+            questionNumber.textContent = `Вопрос ${index + 1} из ${questions.length}`;
+            questionText.textContent = question.question;
+            
+            // Очищаем варианты ответов
+            optionsContainer.innerHTML = '';
+            
+            // Добавляем варианты ответов
+            question.options.forEach((option, i) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                if (userAnswers[index] === i) {
+                    optionElement.classList.add('selected');
+                }
+                
+                optionElement.innerHTML = `
+                    <div class="option-letter">${optionLetters[i]}</div>
+                    <div class="option-text">
+                        ${option.text}
+                        ${option.correct ? '<span class="correct-marker">*</span>' : ''}
+                    </div>
+                `;
+                
+                // Добавляем обработчик клика
+                optionElement.addEventListener('click', () => selectOption(i));
+                
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Обновляем состояние кнопок
+            prevBtn.disabled = index === 0;
+            nextBtn.textContent = index === questions.length - 1 ? 'Завершить тест →' : 'Следующий вопрос →';
+            
+            // Кнопка "Далее" изначально отключена, пока не выбран ответ
+            nextBtn.disabled = userAnswers[currentQuestion] === null;
+            
+            // Обновляем прогресс
+            updateProgress();
+        }
+
+        // Выбор варианта ответа
+        function selectOption(optionIndex) {
+            if (testFinished) return;
+            
+            // Сохраняем ответ пользователя
+            userAnswers[currentQuestion] = optionIndex;
+            
+            // Снимаем выделение со всех вариантов
+            document.querySelectorAll('.option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Выделяем выбранный вариант
+            document.querySelectorAll('.option')[optionIndex].classList.add('selected');
+            
+            // Проверяем правильность ответа
+            const isCorrect = questions[currentQuestion].options[optionIndex].correct;
+            
+            if (isCorrect && !questions[currentQuestion].options[optionIndex].checked) {
+                score++;
+                questions[currentQuestion].options[optionIndex].checked = true;
+            }
+            
+            // Обновляем счет
+            updateProgress();
+            
+            // Активируем кнопку "Далее"
+            nextBtn.disabled = false;
+        }
+
+        // Обновление прогресса
+        function updateProgress() {
+            progressText.textContent = `Вопрос ${currentQuestion + 1} из ${questions.length}`;
+            scoreText.textContent = `${score}/${questions.length}`;
+            
+            // Обновляем прогресс-бар
+            const progressPercentage = ((currentQuestion + 1) / questions.length) * 100;
+            progressFill.style.width = `${progressPercentage}%`;
+        }
+
+        // Следующий вопрос
+        nextBtn.addEventListener('click', function() {
+            if (currentQuestion < questions.length - 1) {
+                showQuestion(currentQuestion + 1);
+            } else {
+                finishTest();
+            }
+        });
+
+        // Предыдущий вопрос
+        prevBtn.addEventListener('click', function() {
+            if (currentQuestion > 0) {
+                showQuestion(currentQuestion - 1);
+            }
+        });
+
+        // Завершение теста
+        function finishTest() {
+            testFinished = true;
+            
+            // Скрываем область вопросов, показываем результат
+            questionArea.style.display = 'none';
+            resultContainer.style.display = 'block';
+            
+            // Обновляем финальный счет
+            finalScore.textContent = `${score}/${questions.length}`;
+            
+            // Выбираем сообщение в зависимости от результата
+            let message = '';
+            if (score === questions.length) {
+                message = 'Идеально! Вы полностью готовы стать частью команды Aviasales! 🎉 Вы прекрасно понимаете нашу философию и подход к маркетингу. Ждём ваше резюме!';
+            } else if (score >= questions.length / 2) {
+                message = 'Отличный результат! Вы хорошо понимаете принципы работы Aviasales. Ещё немного практики — и вы станете отличным SMM-специалистом!';
+            } else {
+                message = 'Неплохо! Вы знаете основы, но рекомендуем ещё раз изучить материалы об Aviasales. Мы уверены, что у вас всё получится!';
+            }
+            
+            resultMessage.textContent = message;
+        }
+
+        // Убрал обработчик для restartBtn, так как кнопка теперь ссылка на другую страницу
+        // realityBtn - это ссылка <a>, поэтому не нужен обработчик клика
+    </script>
+</body>
+</html>
