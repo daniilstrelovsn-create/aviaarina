@@ -1,1 +1,897 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HR Aviasales - Чат</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2B6CFF;
+            --primary-dark: #1A56DB;
+            --background: #F8FAFC;
+            --chat-bg: #FFFFFF;
+            --hr-message: #F0F9FF;
+            --user-message: #2B6CFF;
+            --text-dark: #1F2937;
+            --text-light: #6B7280;
+            --border: #E5E7EB;
+            --radius: 16px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--background);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        /* На ПК - окошко чата */
+        .chat-window {
+            width: 100%;
+            max-width: 800px;
+            height: 90vh;
+            max-height: 700px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border);
+        }
+
+        /* На мобильных - на весь экран */
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+                display: block;
+                background: white;
+            }
+            
+            .chat-window {
+                width: 100%;
+                height: 100vh;
+                max-width: none;
+                max-height: none;
+                border-radius: 0;
+                box-shadow: none;
+                border: none;
+            }
+        }
+
+        /* Шапка */
+        .header {
+            background: white;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2B6CFF, #6EBAFF);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .hr-info h2 {
+            font-size: 18px;
+            color: var(--text-dark);
+            margin-bottom: 2px;
+        }
+
+        .hr-info p {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        /* Контейнер чата */
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Сообщения */
+        .message {
+            max-width: 85%;
+            padding: 14px 18px;
+            border-radius: var(--radius);
+            line-height: 1.5;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hr-message {
+            align-self: flex-start;
+            background: var(--hr-message);
+            border: 1px solid #BAE6FD;
+            color: var(--text-dark);
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background: var(--user-message);
+            color: white;
+        }
+
+        .message-time {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 6px;
+            text-align: right;
+        }
+
+        .hr-message .message-time {
+            color: var(--text-light);
+        }
+
+        /* Кнопка инструкции */
+        .instruction-button {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 12px 20px;
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .instruction-button:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(43, 108, 255, 0.2);
+        }
+
+        /* Клавиатура */
+        .keyboard-container {
+            padding: 16px 20px;
+            background: white;
+            border-top: 1px solid var(--border);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            flex-shrink: 0;
+        }
+
+        /* Поле ввода */
+        .message-input-wrapper {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .message-input {
+            width: 100%;
+            min-height: 60px;
+            padding: 14px 50px 14px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            resize: none;
+            outline: none;
+            transition: border-color 0.2s ease;
+            background: white;
+        }
+
+        .message-input:focus {
+            border-color: var(--primary);
+        }
+
+        .message-input.typing {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(43, 108, 255, 0.1);
+        }
+
+        .send-button {
+            position: absolute;
+            right: 12px;
+            bottom: 12px;
+            width: 36px;
+            height: 36px;
+            background: #E5E7EB;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            opacity: 0.5;
+        }
+
+        .send-button.active {
+            opacity: 1;
+            background: var(--primary);
+        }
+
+        .send-button:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        .send-button svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Виртуальная клавиатура */
+        .keyboard {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 6px;
+        }
+
+        @media (max-width: 768px) {
+            .keyboard {
+                grid-template-columns: repeat(8, 1fr);
+                gap: 4px;
+            }
+        }
+
+        .key {
+            height: 40px;
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-dark);
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.1s ease;
+        }
+
+        .key:hover {
+            background: #E5E7EB;
+        }
+
+        .key:active {
+            background: var(--primary);
+            color: white;
+            transform: scale(0.95);
+        }
+
+        .space-key {
+            grid-column: span 3;
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        .backspace-key {
+            grid-column: span 2;
+            background: #EF4444;
+            color: white;
+        }
+
+        .enter-key {
+            grid-column: span 2;
+            background: #E5E7EB;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .enter-key.active {
+            background: #10B981;
+            color: white;
+        }
+
+        /* Индикатор скорости */
+        .speed-indicator {
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: var(--text-light);
+            text-align: center;
+        }
+
+        /* Кнопка закрытия на ПК */
+        .close-button {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            background: #F3F4F6;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            color: var(--text-light);
+            transition: all 0.2s ease;
+            z-index: 100;
+        }
+
+        .close-button:hover {
+            background: #EF4444;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 768px) {
+            .close-button {
+                display: none;
+            }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .header {
+                padding: 12px 16px;
+            }
+            
+            .chat-container {
+                padding: 16px;
+            }
+            
+            .message {
+                max-width: 90%;
+                padding: 12px 16px;
+            }
+            
+            .keyboard-container {
+                padding: 12px 16px;
+            }
+            
+            .key {
+                height: 36px;
+                font-size: 14px;
+            }
+            
+            .speed-indicator {
+                font-size: 11px;
+                margin-bottom: 6px;
+            }
+        }
+
+        /* Анимация печатания */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 12px 16px;
+            background: var(--hr-message);
+            border-radius: var(--radius);
+            width: fit-content;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--text-light);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-8px); }
+        }
+
+        /* Скроллбар */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-light);
+        }
+
+        /* Декор для ПК версии */
+        @media (min-width: 769px) {
+            body {
+                background: linear-gradient(135deg, #2b6cff 0%, #2b6cff 100%);
+            }
+            
+            .chat-window {
+                animation: slideUp 0.5s ease-out;
+            }
+            
+            @keyframes slideUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px) scale(0.95);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+            }
+        }
+
+        /* Заголовок на ПК */
+        @media (min-width: 769px) {
+            .chat-title {
+                position: fixed;
+                top: 40px;
+                left: 50%;
+                transform: translateX(-50%);
+                text-align: center;
+                color: white;
+                z-index: 1;
+            }
+            
+            .chat-title h1 {
+                font-size: 32px;
+                margin-bottom: 8px;
+                text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            }
+            
+            .chat-title p {
+                font-size: 16px;
+                opacity: 0.9;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Заголовок только на ПК -->
+    <div class="chat-title" style="display: none;">
+        <h1></h1>
+        <p>Чат с HR-специалистом для новых сотрудников</p>
+    </div>
+
+    <!-- Кнопка закрытия только на ПК -->
+    <button class="close-button" onclick="window.close()" style="display: none;">×</button>
+
+    <!-- Окошко чата -->
+    <div class="chat-window">
+        <!-- Шапка с HR -->
+        <div class="header">
+            <div class="avatar">А</div>
+            <div class="hr-info">
+                <h2>Анна</h2>
+                <p>HR Aviasales</p>
+            </div>
+        </div>
+
+        <!-- Контейнер чата -->
+        <div class="chat-container" id="chatContainer">
+            <!-- Первое сообщение HR -->
+            <div class="message hr-message">
+                <div class="message-text">Добрый день! Меня зовут Анна, я HR Aviasales.</div>
+                <div class="message-time">10:00</div>
+            </div>
+        </div>
+
+        <!-- Клавиатура -->
+        <div class="keyboard-container">
+            <!-- Индикатор скорости -->
+            <div class="speed-indicator" id="speedIndicator">
+                💡 Совет: используйте физическую клавиатуру для быстрого набора!
+            </div>
+
+            <!-- Поле ввода с кнопкой отправки -->
+            <div class="message-input-wrapper">
+                <textarea 
+                    id="messageInput" 
+                    class="message-input" 
+                    placeholder="Напишите сообщение..."
+                    rows="3"
+                ></textarea>
+                <button class="send-button" id="sendButton">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Виртуальная клавиатура -->
+            <div class="keyboard" id="keyboard">
+                <!-- Буквы и цифры -->
+                <div class="key" data-key="Й">Й</div>
+                <div class="key" data-key="Ц">Ц</div>
+                <div class="key" data-key="У">У</div>
+                <div class="key" data-key="К">К</div>
+                <div class="key" data-key="Е">Е</div>
+                <div class="key" data-key="Н">Н</div>
+                <div class="key" data-key="Г">Г</div>
+                <div class="key" data-key="Ш">Ш</div>
+                <div class="key" data-key="Щ">Щ</div>
+                <div class="key" data-key="З">З</div>
+                
+                <div class="key" data-key="Ф">Ф</div>
+                <div class="key" data-key="Ы">Ы</div>
+                <div class="key" data-key="В">В</div>
+                <div class="key" data-key="А">А</div>
+                <div class="key" data-key="П">П</div>
+                <div class="key" data-key="Р">Р</div>
+                <div class="key" data-key="О">О</div>
+                <div class="key" data-key="Л">Л</div>
+                <div class="key" data-key="Д">Д</div>
+                <div class="key" data-key="Ж">Ж</div>
+                
+                <div class="key" data-key="Я">Я</div>
+                <div class="key" data-key="Ч">Ч</div>
+                <div class="key" data-key="С">С</div>
+                <div class="key" data-key="М">М</div>
+                <div class="key" data-key="И">И</div>
+                <div class="key" data-key="Т">Т</div>
+                <div class="key" data-key="Ь">Ь</div>
+                <div class="key" data-key="Б">Б</div>
+                <div class="key" data-key="Ю">Ю</div>
+                <div class="key" data-key=".">.</div>
+                
+                <!-- Специальные клавиши -->
+                <div class="key" data-key=",">,</div>
+                <div class="key" data-key="!">!</div>
+                <div class="key" data-key="?">?</div>
+                <div class="key space-key" data-key=" ">Пробел</div>
+                <div class="key backspace-key" data-key="backspace">←</div>
+                <div class="key enter-key" id="enterKey">Отправить</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Определяем устройство
+        const isMobile = window.innerWidth <= 768;
+        
+        // Показываем/скрываем элементы в зависимости от устройства
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatTitle = document.querySelector('.chat-title');
+            
+            if (!isMobile) {
+                // На ПК показываем заголовок и кнопку закрытия
+                chatTitle.style.display = 'block';
+        
+
+                
+                // Добавляем описание для ПК
+                document.querySelector('.hr-info p').textContent = 'HR Aviasales | Чат для новых сотрудников';
+            }
+            
+            const chatContainer = document.getElementById('chatContainer');
+            const messageInput = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+            const enterKey = document.getElementById('enterKey');
+            const keyboard = document.getElementById('keyboard');
+            const speedIndicator = document.getElementById('speedIndicator');
+            
+            let userMessageSent = false;
+            let targetMessage = "Здравствуйте! Меня зовут Олег, завтра мой первый рабочий день. Я немного волнуюсь перед выходом на должность, у вас есть памятка для новых сотрудников, чтобы быстрее влиться в работу?";
+            let currentText = "";
+            
+            // Магия: пользователь набирает что угодно, но в поле появляется правильный текст
+            let magicIndex = 0;
+            let isUsingPhysicalKeyboard = false;
+            let lastKeypressTime = 0;
+
+            // Константы скорости
+            const PHYSICAL_KEYBOARD_SPEED = 1.5; // Быстрее на 50%
+            const VIRTUAL_KEYBOARD_SPEED = 2.2;  // Нормальная скорость
+            let currentSpeedMultiplier = VIRTUAL_KEYBOARD_SPEED;
+
+            // Обновляем индикатор скорости
+            function updateSpeedIndicator() {
+                if (isUsingPhysicalKeyboard) {
+                    speedIndicator.textContent = "⚡ Вы используете физическую клавиатуру (быстрый набор)";
+                    speedIndicator.style.color = "#10B981";
+                } else {
+                    speedIndicator.textContent = "👆 Вы используете виртуальную клавиатуру";
+                    speedIndicator.style.color = "#6B7280";
+                }
+            }
+
+            // Функция продвижения текста
+            function advanceText(amount = 1) {
+                if (magicIndex < targetMessage.length) {
+                    magicIndex = Math.min(magicIndex + amount, targetMessage.length);
+                    currentText = targetMessage.substring(0, magicIndex);
+                    messageInput.value = currentText;
+                    messageInput.scrollTop = messageInput.scrollHeight;
+                    
+                    // Анимация печатания
+                    messageInput.classList.add('typing');
+                    setTimeout(() => {
+                        messageInput.classList.remove('typing');
+                    }, 200);
+                    
+                    // Активируем кнопку отправки, когда текст полностью набран
+                    if (currentText === targetMessage) {
+                        sendButton.classList.add('active');
+                        enterKey.classList.add('active');
+                        enterKey.style.backgroundColor = '#10B981';
+                    } else {
+                        sendButton.classList.remove('active');
+                        enterKey.classList.remove('active');
+                        enterKey.style.backgroundColor = '';
+                    }
+                }
+            }
+
+            // Обработка нажатия клавиш на виртуальной клавиатуре
+            keyboard.addEventListener('click', function(e) {
+                if (userMessageSent) return;
+                
+                const key = e.target.closest('.key');
+                if (!key) return;
+                
+                const keyValue = key.dataset.key;
+                
+                // Переключаем на виртуальную клавиатуру
+                isUsingPhysicalKeyboard = false;
+                currentSpeedMultiplier = VIRTUAL_KEYBOARD_SPEED;
+                updateSpeedIndicator();
+                
+                // Анимация нажатия
+                key.style.backgroundColor = '#2B6CFF';
+                key.style.color = 'white';
+                key.style.transform = 'scale(0.95)';
+                
+                setTimeout(() => {
+                    key.style.backgroundColor = '';
+                    key.style.color = '';
+                    key.style.transform = '';
+                }, 150);
+                
+                // Обработка специальных клавиш
+                if (keyValue === 'backspace') {
+                    if (magicIndex > 0) {
+                        magicIndex = Math.max(0, magicIndex - Math.ceil(1 * currentSpeedMultiplier));
+                        currentText = targetMessage.substring(0, magicIndex);
+                        messageInput.value = currentText;
+                    }
+                } else if (keyValue === ' ') {
+                    // Пробел - переходим к следующему слову
+                    let nextSpace = targetMessage.indexOf(' ', magicIndex);
+                    if (nextSpace === -1) nextSpace = targetMessage.length;
+                    
+                    const wordLength = nextSpace - magicIndex;
+                    const advanceAmount = Math.ceil(wordLength * 0.5 * currentSpeedMultiplier);
+                    advanceText(advanceAmount);
+                } else if (keyValue === 'enter') {
+                    // Отправка
+                    if (currentText === targetMessage) {
+                        sendMessage();
+                    }
+                } else {
+                    // Любая другая клавиша
+                    const advanceAmount = Math.ceil(1 * currentSpeedMultiplier);
+                    advanceText(advanceAmount);
+                }
+            });
+
+            // Обработка физической клавиатуры
+            document.addEventListener('keydown', function(e) {
+                if (userMessageSent) return;
+                
+                // Фокус на поле ввода
+                if (messageInput !== document.activeElement) {
+                    messageInput.focus();
+                }
+                
+                const now = Date.now();
+                
+                // Определяем, что это быстрое нажатие (менее 100 мс между клавишами)
+                if (now - lastKeypressTime < 100) {
+                    isUsingPhysicalKeyboard = true;
+                    currentSpeedMultiplier = PHYSICAL_KEYBOARD_SPEED;
+                    updateSpeedIndicator();
+                }
+                lastKeypressTime = now;
+                
+                // Разрешаем только backspace и delete
+                if (e.key === 'Backspace') {
+                    if (magicIndex > 0) {
+                        const backspaceAmount = Math.ceil(2 * currentSpeedMultiplier); // Backspace быстрее
+                        magicIndex = Math.max(0, magicIndex - backspaceAmount);
+                        currentText = targetMessage.substring(0, magicIndex);
+                        messageInput.value = currentText;
+                    }
+                    e.preventDefault();
+                } else if (e.key === 'Delete') {
+                    // Delete - просто пересчитываем
+                    magicIndex = Math.min(magicIndex, currentText.length);
+                    currentText = targetMessage.substring(0, magicIndex);
+                    messageInput.value = currentText;
+                    e.preventDefault();
+                } else if (e.key.length === 1) { // Любая буква/цифра/символ
+                    if (magicIndex < targetMessage.length) {
+                        const advanceAmount = Math.ceil(2 * currentSpeedMultiplier); // Буквы быстрее
+                        advanceText(advanceAmount);
+                    }
+                    e.preventDefault();
+                } else if (e.key === ' ') { // Пробел
+                    if (magicIndex < targetMessage.length) {
+                        // Находим следующее слово
+                        let nextSpace = targetMessage.indexOf(' ', magicIndex);
+                        if (nextSpace === -1) nextSpace = targetMessage.length;
+                        
+                        const wordLength = nextSpace - magicIndex;
+                        const advanceAmount = Math.ceil(wordLength * 0.8 * currentSpeedMultiplier); // Пробел очень быстрый
+                        advanceText(advanceAmount);
+                    }
+                    e.preventDefault();
+                } else if (e.key === 'Enter') {
+                    if (currentText === targetMessage) {
+                        sendMessage();
+                    }
+                    e.preventDefault();
+                } else if (e.key === 'Tab') {
+                    // Tab - переходим к концу сообщения
+                    magicIndex = targetMessage.length;
+                    currentText = targetMessage;
+                    messageInput.value = currentText;
+                    sendButton.classList.add('active');
+                    enterKey.classList.add('active');
+                    enterKey.style.backgroundColor = '#10B981';
+                    e.preventDefault();
+                }
+                
+                messageInput.scrollTop = messageInput.scrollHeight;
+            });
+
+            // Отправка сообщения
+            function sendMessage() {
+                if (userMessageSent || currentText !== targetMessage) return;
+                
+                userMessageSent = true;
+                
+                // Добавляем сообщение пользователя
+                const userMessage = document.createElement('div');
+                userMessage.className = 'message user-message';
+                userMessage.innerHTML = `
+                    <div class="message-text">${currentText}</div>
+                    <div class="message-time">${getCurrentTime()}</div>
+                `;
+                chatContainer.appendChild(userMessage);
+                
+                // ОЧИЩАЕМ ПОЛЕ ВВОДА
+                messageInput.value = "";
+                messageInput.classList.remove('typing');
+                
+                // Блокируем поле ввода и клавиатуру
+                messageInput.disabled = true;
+                messageInput.style.opacity = '0.7';
+                sendButton.disabled = true;
+                sendButton.classList.remove('active');
+                
+                // Блокируем виртуальную клавиатуру
+                keyboard.style.opacity = '0.5';
+                keyboard.style.pointerEvents = 'none';
+                enterKey.classList.remove('active');
+                
+                // Скрываем индикатор скорости
+                speedIndicator.style.display = 'none';
+                
+                // Прокручиваем вниз
+                setTimeout(() => {
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }, 100);
+                
+                // Показываем индикатор набора текста HR
+                setTimeout(() => {
+                    const typingIndicator = document.createElement('div');
+                    typingIndicator.className = 'typing-indicator';
+                    typingIndicator.innerHTML = `
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    `;
+                    chatContainer.appendChild(typingIndicator);
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                    
+                    // Ответ HR через 2 секунды
+                    setTimeout(() => {
+                        typingIndicator.remove();
+                        
+                        const hrResponse = document.createElement('div');
+                        hrResponse.className = 'message hr-message';
+                        hrResponse.innerHTML = `
+                            <div class="message-text">
+                                Здравствуй! Наш предыдущий сотрудник успел оставить нам инструкцию перед тем, как пропасть. Подозреваем, что он настолько погрузился в работу, что попал в параллельную реальность, так что будь осторожен.
+                                <br><br>
+                                <a href="longread.html" class="instruction-button">
+                                    "Инструкция. Никита (1)"
+                                </a>
+                            </div>
+                            <div class="message-time">${getCurrentTime()}</div>
+                        `;
+                        chatContainer.appendChild(hrResponse);
+                        
+                        // Прокручиваем вниз
+                        setTimeout(() => {
+                            chatContainer.scrollTop = chatContainer.scrollHeight;
+                        }, 100);
+                    }, 2000);
+                }, 1000);
+            }
+
+            // Обработчики отправки
+            sendButton.addEventListener('click', function() {
+                if (currentText === targetMessage) {
+                    sendMessage();
+                }
+            });
+
+            enterKey.addEventListener('click', function() {
+                if (currentText === targetMessage) {
+                    sendMessage();
+                }
+            });
+
+            // Вспомогательная функция для получения текущего времени
+            function getCurrentTime() {
+                const now = new Date();
+                return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            }
+
+            // Фокус на поле ввода при загрузке
+            messageInput.focus();
+            updateSpeedIndicator();
+            
+            // Подсказка
+            setTimeout(() => {
+                if (!isUsingPhysicalKeyboard && magicIndex === 0) {
+                    speedIndicator.innerHTML = "💡 <strong>Совет:</strong> Нажмите Tab чтобы быстро заполнить всё сообщение!";
+                    speedIndicator.style.color = "#2B6CFF";
+                    
+                    setTimeout(() => {
+                        updateSpeedIndicator();
+                    }, 5000);
+                }
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
