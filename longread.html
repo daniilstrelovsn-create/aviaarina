@@ -1389,10 +1389,12 @@
   margin-bottom: 24px;
 }
 
+
 /* ===== КОММЕНТАРИИ ЕГОРА МАЛИНИНА ===== */
 .avatar-comment {
-  position: fixed; /* Меняем на fixed для позиционирования относительно окна */
-  right: 20px; /* Позиционируем от правого края */
+  position: absolute;
+  left: 100%; /* Позиционируем справа от контейнера */
+  margin-left: 30px; /* Отступ от контейнера */
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   z-index: 100;
@@ -1430,16 +1432,28 @@
 }
 
 /* Для очень маленьких мобильных устройств */
-@media (max-width: 699px) {
+@media (max-width: 799px) {
   .avatar-comment {
-    display: none; /* Скрываем на очень маленьких экранах */
+    left: 3%;
+  }
+  
+  .avatar-img {
+    width: 40px;
+    height: 40px;
+    border-width: 2px;
+  }
+  
+  .notification-badge {
+    width: 18px;
+    height: 18px;
+    font-size: 9px;
   }
 }
 
 /* Для средних экранов (700px - 900px) */
-@media (min-width: 700px) and (max-width: 900px) {
+@media (min-width: 800px) and (max-width: 900px) {
   .avatar-comment {
-    right: 15px;
+    left: 95%
   }
   
   .avatar-img {
@@ -1458,7 +1472,7 @@
 /* Для больших планшетов (901px - 1200px) */
 @media (min-width: 901px) and (max-width: 1200px) {
   .avatar-comment {
-    right: 20px;
+    margin-left: 25px;
   }
   
   .avatar-img {
@@ -1475,7 +1489,7 @@
 /* Для десктопов (1201px - 1400px) */
 @media (min-width: 1201px) and (max-width: 1400px) {
   .avatar-comment {
-    right: 25px;
+    margin-left: 25px;
   }
   
   .avatar-img {
@@ -1487,7 +1501,7 @@
 /* Для больших экранов (1401px - 1600px) */
 @media (min-width: 1401px) and (max-width: 1600px) {
   .avatar-comment {
-    right: 30px;
+    margin-left: 30px;
   }
   
   .avatar-img {
@@ -1499,7 +1513,7 @@
 /* Для очень больших экранов (1601px+) */
 @media (min-width: 1601px) {
   .avatar-comment {
-    right: 35px;
+    margin-left: 35px;
   }
   
   .avatar-img {
@@ -1662,68 +1676,6 @@
   visibility: visible;
 }
 
-/* Для мобильных устройств */
-@media (max-width: 1200px) {
-  .avatar-comment {
-    display: none; /* Скрываем на мобильных */
-  }
-}
-
-@media (min-width: 1201px) and (max-width: 1400px) {
-  .avatar-comment {
-    margin-left: 20px;
-  }
-  
-  .avatar-img {
-    width: 45px;
-    height: 45px;
-  }
-}
-
-@media (min-width: 1401px) and (max-width: 1600px) {
-  .avatar-comment {
-    margin-left: 25px;
-  }
-  
-  .avatar-img {
-    width: 50px;
-    height: 50px;
-  }
-}
-
-@media (min-width: 1601px) {
-  .avatar-comment {
-    margin-left: 35px;
-  }
-  
-  .avatar-img {
-    width: 60px;
-    height: 60px;
-  }
-}
-
-@media (max-width: 768px) {
-  .avatar-img {
-    width: 40px;
-    height: 40px;
-  }
-
-  .comment-popup {
-    padding: 20px;
-    width: 95vw;
-  }
-
-  .comment-header {
-    flex-direction: column;
-    text-align: center;
-    gap: 10px;
-  }
-
-  .comment-avatar {
-    width: 50px;
-    height: 50px;
-  }
-}
 
 /* Подсветка связанного текста */
 .highlighted-text {
@@ -1867,36 +1819,36 @@
   <!-- Основной контейнер контента -->
   <div class="container">
 
-<!-- Кружки с комментариями (теперь фиксированные относительно окна) -->
-<div class="avatar-comment" data-comment="1" style="top: 230px;">
-  <img src="avatar.png" alt="Егор Малинин" class="avatar-img">
-  <div class="notification-badge">1</div>
-</div>
+    <!-- Кружки с комментариями (теперь внутри контейнера для правильного скролла) -->
+    <div class="avatar-comment" data-comment="1" style="top: 230px;">
+      <img src="avatar.png" alt="Егор Малинин" class="avatar-img">
+      <div class="notification-badge">1</div>
+    </div>
 
-<div class="avatar-comment" data-comment="2" style="top: 420px;">
-  <img src="avatar.png" alt="Егор Малинин" class="avatar-img">
-  <div class="notification-badge">2</div>
-</div>
+    <div class="avatar-comment" data-comment="2" style="top: 420px;">
+      <img src="avatar.png" alt="Егор Малинин" class="avatar-img">
+      <div class="notification-badge">2</div>
+    </div>
 
-<div class="avatar-comment" data-comment="3" style="top: 1500px;">
-  <img src="avatar.png" alt="Егор Малинин" class="avatar-img">
-  <div class="notification-badge">3</div>
-</div>
+    <div class="avatar-comment" data-comment="3" style="top: 1500px;">
+      <img src="avatar.png" alt="Егор Малинин" class="avatar-img">
+      <div class="notification-badge">3</div>
+    </div>
 
-<div class="avatar-comment" data-comment="4" style="top: 5750px;">
-  <img src="avatar.png" alt="Егор Малинин" class="avatar-img">
-  <div class="notification-badge">4</div>
-</div>
+    <div class="avatar-comment" data-comment="4" style="top: 5750px;">
+      <img src="avatar.png" alt="Егор Малинин" class="avatar-img">
+      <div class="notification-badge">4</div>
+    </div>
 
-<div class="avatar-comment" data-comment="5" style="top: 5830px;">
-  <img src="avatar.png" alt="Егор Малинин" class="avatar-img">
-  <div class="notification-badge">5</div>
-</div>
+    <div class="avatar-comment" data-comment="5" style="top: 5830px;">
+      <img src="avatar.png" alt="Егор Малинин" class="avatar-img">
+      <div class="notification-badge">5</div>
+    </div>
 
-<div class="avatar-comment" data-comment="6" style="top: 6000px;">
-  <img src="avatar.png" alt="Егор Малинин" class="avatar-img">
-  <div class="notification-badge">6</div>
-</div>
+    <div class="avatar-comment" data-comment="6" style="top: 6000px;">
+      <img src="avatar.png" alt="Егор Малинин" class="avatar-img">
+      <div class="notification-badge">6</div>
+    </div>
 
     <h1>Инструкция</h1>
 
@@ -3343,10 +3295,3 @@ document.addEventListener('DOMContentLoaded', function() {
 
 </body>
 </html>
-
-
-
-
-
-
-
