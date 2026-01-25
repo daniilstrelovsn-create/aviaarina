@@ -204,6 +204,7 @@
       align-items: center;
       justify-content: center;
       transition: border-color .2s, background .2s;
+      -webkit-tap-highlight-color: transparent; /* Убирает подсветку при касании на iOS */
     }
 
     .generation.dragover {
@@ -229,6 +230,9 @@
       width: 94%;
       text-align: center;
       transition: transform .25s ease, opacity .25s ease;
+      touch-action: manipulation; /* Улучшает работу на touch-устройствах */
+      -webkit-user-select: none; /* Для Safari */
+      user-select: none;
     }
 
     .tool:active {
@@ -1592,6 +1596,33 @@
       background: linear-gradient(120deg, rgba(255, 71, 87, 0.2) 0%, rgba(255, 71, 87, 0.1) 100%);
       box-shadow: 0 0 0 2px rgba(255, 71, 87, 0.3);
     }
+
+    /* Стили для touch-устройств */
+.tool {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.generation {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Для предотвращения выделения текста на iOS */
+* {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.generation.dragover {
+  border-color: var(--accent) !important;
+  background: #eef3ff !important;
+  transition: all 0.2s ease;
+}
   </style>
 </head>
 <body>
@@ -2745,13 +2776,16 @@ document.addEventListener('DOMContentLoaded', function() {
   // Автопереключение каждые 5 секунд
   setInterval(nextSlide, 5000);
 
-  // DRAG & DROP MATCHER
+// DRAG & DROP MATCHER (с поддержкой touch)
+document.addEventListener('DOMContentLoaded', function() {
   const tools = document.querySelectorAll('.tool');
   const generations = document.querySelectorAll('.generation');
   const checkBtn = document.querySelector('.check');
   const toolsColumn = document.querySelector('.tools-column');
 
   let draggedTool = null;
+  let touchStartY = 0;
+  let touchStartX = 0;
 
   const correctMatches = {
     alpha: "game",
@@ -2774,36 +2808,179 @@ document.addEventListener('DOMContentLoaded', function() {
     checkBtn.disabled = assigned !== tools.length;
   }
 
-  tools.forEach(tool => {
-    tool.addEventListener('dragstart', () => draggedTool = tool);
-  });
+  // Функция для определения touch-устройства
+  function isTouchDevice() {
+    return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  }
 
-  generations.forEach(gen => {
-    gen.addEventListener('dragover', e => {
-      e.preventDefault();
-      gen.classList.add('dragover');
+  // Обработчики для desktop (drag & drop)
+  if (!isTouchDevice()) {
+    tools.forEach(tool => {
+      tool.addEventListener('dragstart', () => draggedTool = tool);
     });
 
-    gen.addEventListener('dragleave', () => {
-      gen.classList.remove('dragover');
-    });
-
-    gen.addEventListener('drop', () => {
-      gen.classList.remove('dragover');
-      if (!draggedTool) return;
-
-      generations.forEach(g => {
-        if (g.contains(draggedTool)) g.innerHTML = '';
+    generations.forEach(gen => {
+      gen.addEventListener('dragover', e => {
+        e.preventDefault();
+        gen.classList.add('dragover');
       });
 
-      draggedTool.classList.add('assigned');
-      gen.appendChild(draggedTool);
-      draggedTool = null;
+      gen.addEventListener('dragleave', () => {
+        gen.classList.remove('dragover');
+      });
 
-      updateCheckButtonState();
+      gen.addEventListener('drop', () => {
+        gen.classList.remove('dragover');
+        if (!draggedTool) return;
+
+        generations.forEach(g => {
+          if (g.contains(draggedTool)) g.innerHTML = '';
+        });
+
+        draggedTool.classList.add('assigned');
+        gen.appendChild(draggedTool);
+        draggedTool = null;
+
+        updateCheckButtonState();
+      });
     });
-  });
+  } 
+  // Обработчики для touch-устройств (iOS)
+  else {
+    tools.forEach(tool => {
+      // Убираем стандартный dragstart для touch
+      tool.draggable = false;
+      
+      // Touch события
+      tool.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        draggedTool = this;
+        
+        // Получаем координаты касания
+        const touch = e.touches[0];
+        touchStartY = touch.clientY;
+        touchStartX = touch.clientX;
+        
+        // Визуальная обратная связь
+        this.style.opacity = '0.7';
+        this.style.transform = 'scale(0.95)';
+        
+        // Создаем клон для перетаскивания
+        const clone = this.cloneNode(true);
+        clone.classList.add('dragging-clone');
+        clone.style.position = 'fixed';
+        clone.style.zIndex = '1000';
+        clone.style.pointerEvents = 'none';
+        clone.style.width = this.offsetWidth + 'px';
+        clone.style.left = touch.clientX - this.offsetWidth / 2 + 'px';
+        clone.style.top = touch.clientY - this.offsetHeight / 2 + 'px';
+        clone.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
+        document.body.appendChild(clone);
+        
+        this.cloneForTouch = clone;
+      });
+      
+      tool.addEventListener('touchmove', function(e) {
+        if (!draggedTool) return;
+        e.preventDefault();
+        
+        const touch = e.touches[0];
+        if (this.cloneForTouch) {
+          this.cloneForTouch.style.left = touch.clientX - this.offsetWidth / 2 + 'px';
+          this.cloneForTouch.style.top = touch.clientY - this.offsetHeight / 2 + 'px';
+        }
+        
+        // Определяем, над каким поколением находится палец
+        const touchX = touch.clientX;
+        const touchY = touch.clientY;
+        
+        generations.forEach(gen => {
+          const rect = gen.getBoundingClientRect();
+          if (touchX >= rect.left && touchX <= rect.right &&
+              touchY >= rect.top && touchY <= rect.bottom) {
+            gen.classList.add('dragover');
+          } else {
+            gen.classList.remove('dragover');
+          }
+        });
+      });
+      
+      tool.addEventListener('touchend', function(e) {
+        if (!draggedTool) return;
+        e.preventDefault();
+        
+        // Восстанавливаем стиль
+        this.style.opacity = '1';
+        this.style.transform = 'scale(1)';
+        
+        // Находим поколение под пальцем
+        const touch = e.changedTouches[0];
+        const touchX = touch.clientX;
+        const touchY = touch.clientY;
+        let targetGeneration = null;
+        
+        generations.forEach(gen => {
+          const rect = gen.getBoundingClientRect();
+          if (touchX >= rect.left && touchX <= rect.right &&
+              touchY >= rect.top && touchY <= rect.bottom) {
+            targetGeneration = gen;
+            gen.classList.remove('dragover');
+          } else {
+            gen.classList.remove('dragover');
+          }
+        });
+        
+        // Если нашли поколение - перемещаем туда инструмент
+        if (targetGeneration) {
+          generations.forEach(g => {
+            if (g.contains(this)) g.innerHTML = '';
+          });
+          
+          this.classList.add('assigned');
+          targetGeneration.appendChild(this);
+          updateCheckButtonState();
+        }
+        
+        // Удаляем клон
+        if (this.cloneForTouch) {
+          this.cloneForTouch.remove();
+          this.cloneForTouch = null;
+        }
+        
+        draggedTool = null;
+      });
+      
+      // Отмена касания
+      tool.addEventListener('touchcancel', function() {
+        this.style.opacity = '1';
+        this.style.transform = 'scale(1)';
+        
+        if (this.cloneForTouch) {
+          this.cloneForTouch.remove();
+          this.cloneForTouch = null;
+        }
+        
+        generations.forEach(gen => {
+          gen.classList.remove('dragover');
+        });
+        
+        draggedTool = null;
+      });
+    });
+    
+    // Обработчики для поколений на touch
+    generations.forEach(gen => {
+      gen.addEventListener('touchmove', function(e) {
+        e.preventDefault(); // Предотвращаем скролл страницы
+      });
+      
+      gen.addEventListener('touchend', function(e) {
+        e.preventDefault();
+      });
+    });
+  }
 
+  // Проверка ответов (работает на всех устройствах)
   checkBtn.addEventListener('click', () => {
     let score = 0;
     const total = Object.keys(correctMatches).length;
@@ -2812,18 +2989,14 @@ document.addEventListener('DOMContentLoaded', function() {
       const tool = gen.querySelector('.tool');
       if (!tool) return;
 
-      const isCorrect =
-        correctMatches[gen.dataset.gen] === tool.dataset.tool;
+      const isCorrect = correctMatches[gen.dataset.gen] === tool.dataset.tool;
 
-      gen.style.borderColor = isCorrect
-        ? 'var(--ok)'
-        : 'var(--bad)';
+      gen.style.borderColor = isCorrect ? 'var(--ok)' : 'var(--bad)';
 
       if (isCorrect) score++;
     });
 
     if (score === total) {
-      // Показываем успех через изменение цвета всех поколений
       generations.forEach(gen => {
         const tool = gen.querySelector('.tool');
         if (tool) {
@@ -2832,18 +3005,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       });
     } else {
-      // Сбрасываем цвета
-      generations.forEach(gen => {
-        gen.style.borderColor = '#e5e7eb';
-        const tool = gen.querySelector('.tool');
-        if (tool) {
-          tool.style.background = '#eef2ff';
-          tool.style.borderColor = 'var(--accent)';
-        }
-      });
+      setTimeout(() => {
+        generations.forEach(gen => {
+          gen.style.borderColor = '#e5e7eb';
+          const tool = gen.querySelector('.tool');
+          if (tool) {
+            tool.style.background = '#eef2ff';
+            tool.style.borderColor = 'var(--accent)';
+          }
+        });
+      }, 2000);
     }
   });
 
+  // Сброс (работает на всех устройствах)
   document.querySelector('.reset').addEventListener('click', () => {
     const shuffled = shuffle(Array.from(tools));
 
@@ -2857,12 +3032,38 @@ document.addEventListener('DOMContentLoaded', function() {
         tool.style.opacity = '1';
       }, i * 60);
     });
+    
     generations.forEach(gen => {
       gen.style.borderColor = '#e5e7eb';
       gen.innerHTML = '';
     });
+    
     checkBtn.disabled = true;
   });
+
+  // Добавляем стили для клона при перетаскивании на touch
+  const style = document.createElement('style');
+  style.textContent = `
+    .dragging-clone {
+      transition: transform 0.1s ease;
+      cursor: grabbing !important;
+    }
+    
+    /* Предотвращаем выделение текста на iOS */
+    * {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    
+    /* Для поколений на touch */
+    .generation.dragover {
+      border-color: var(--accent) !important;
+      background: #eef3ff !important;
+    }
+  `;
+  document.head.appendChild(style);
+});
 
   // Интерактивные кружки на картинке
   document.addEventListener('DOMContentLoaded', function() {
@@ -3004,3 +3205,4 @@ document.addEventListener('DOMContentLoaded', function() {
 
 </body>
 </html>
+
