@@ -32,7 +32,7 @@
     }
 
     .container {
-      max-width: 1000px;
+      max-width: 0px;
       margin: 0 auto;
       padding: 64px 24px 96px;
     }
@@ -68,7 +68,7 @@
     .gallery {
       margin-top: 32px;
       position: relative;
-      width: 100%;
+      width: %;
       max-width: 800px;
       margin-left: auto;
       margin-right: auto;
@@ -86,7 +86,7 @@
     }
 
     .gallery-img {
-      width: 100%;
+      width: %;
       height: 90%;
       object-fit: cover;
       display: none;
@@ -506,7 +506,7 @@
 }
 
 .rule-image {
-    width: 100%;
+    width: %;
     height: 400px;
     object-fit: cover;
     display: block;
@@ -526,7 +526,7 @@
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
+    width: %;
     height: 400px;
 }
 
@@ -684,22 +684,22 @@
             linear-gradient(to bottom, 
                 #0C73FE 0%,      /* Синий сверху */
                 #6EBAFF 50%,     /* Голубой в середине */
-                #ffffff 100%     /* Белый снизу */
-            ) left / calc(50% - 600px) 100% no-repeat,
+                #ffffff %     /* Белый снизу */
+            ) left / calc(50% - 600px) % no-repeat,
             
             /* Правый градиент */
             linear-gradient(to bottom, 
                 #0C73FE 0%,
                 #6EBAFF 50%,
-                #ffffff 100%
-            ) right / calc(50% - 600px) 100% no-repeat,
+                #ffffff %
+            ) right / calc(50% - 600px) % no-repeat,
             
             /* Белый фон в центре */
-            #ffffff center / 1200px 100% no-repeat;
+            #ffffff center / 1200px % no-repeat;
         
         background-attachment: fixed;
         color: var(--text);
-        min-height: 100vh;
+        min-height: vh;
     }
 
 
@@ -1726,37 +1726,37 @@
 
      <div class="container">
         <!-- Кружок 1 рядом с первым комментарием -->
-    <div class="avatar-comment" data-comment="1" style="top: 230px; right: calc(5*100vw/224 -90/7);">
+    <div class="avatar-comment" data-comment="1" style="top: 230px; right: calc(3*100vw/112 -80/7);">
       <img src="avatar.png" alt="Егор Малинин" class="avatar-img">
       <div class="notification-badge">1</div>
     </div>
 
     <!-- Кружок 2 рядом со вторым комментарием -->
-    <div class="avatar-comment" data-comment="2" style="top: 420px; right: calc(5*100vw/224 -90/7);">
+    <div class="avatar-comment" data-comment="2" style="top: 420px; right: calc(3*100vw/112 -80/7);">
       <img src="avatar.png" alt="Егор Малинин" class="avatar-img">
       <div class="notification-badge">2</div>
     </div>
 
     <!-- Кружок 3 рядом с третьим комментарием -->
-    <div class="avatar-comment" data-comment="3" style="top: 1500px; right: calc(5*100vw/224 -90/7);">
+    <div class="avatar-comment" data-comment="3" style="top: 1500px; right: calc(3*100vw/112 -80/7);">
       <img src="avatar.png" alt="Егор Малинин" class="avatar-img">
       <div class="notification-badge">3</div>
     </div>
 
     <!-- Кружок 4 рядом с четвертым комментарием -->
-    <div class="avatar-comment" data-comment="4" style="top: 5750px; right: calc(5*100vw/224 -90/7);">
+    <div class="avatar-comment" data-comment="4" style="top: 5750px; right: calc(3*100vw/112 -80/7);">
       <img src="avatar.png" alt="Егор Малинин" class="avatar-img">
       <div class="notification-badge">4</div>
     </div>
 
     <!-- Кружок 5 рядом с пятым комментарием -->
-    <div class="avatar-comment" data-comment="5" style="top: 5830px; right: calc(5*100vw/224 -90/7);">
+    <div class="avatar-comment" data-comment="5" style="top: 5830px; right: calc(3*100vw/112 -80/7);">
       <img src="avatar.png" alt="Егор Малинин" class="avatar-img">
       <div class="notification-badge">5</div>
     </div>
 
     <!-- Кружок 6 рядом с пятым комментарием -->
-    <div class="avatar-comment" data-comment="6" style="top: 6000px; right: calc(5*100vw/224 -90/7);">
+    <div class="avatar-comment" data-comment="6" style="top: 6000px; right: calc(3*100vw/112 -80/7);">
       <img src="avatar.png" alt="Егор Малинин" class="avatar-img">
       <div class="notification-badge">6</div>
     </div>
@@ -3206,6 +3206,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 </body>
 </html>
+
 
 
 
