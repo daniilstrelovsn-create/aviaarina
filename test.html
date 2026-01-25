@@ -128,9 +128,6 @@
             flex-shrink: 0; /* Не сжимается */
         }
 
-        .question-text {
-            /* Текст внутри контейнера */
-        }
 
         /* Варианты ответов */
         .options-container {
@@ -332,13 +329,23 @@
             line-height: 1.6;
         }
 
+        /* Обновленные стили для мем-контейнера */
         .meme-container {
-            max-width: 400px;
+            max-width: 100%; /* Вместо фиксированной ширины */
             margin: 0 auto;
             background: white;
             border-radius: 16px;
             padding: 20px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            overflow: hidden; /* Важно: скрываем выходящее за пределы */
+        }
+
+        .meme-container img {
+            width: 100%; /* Картинка занимает всю ширину контейнера */
+            height: auto; /* Сохраняем пропорции */
+            max-width: 400px; /* Максимальная ширина для больших экранов */
+            display: block;
+            margin: 0 auto; /* Центрируем картинку */
         }
 
         /* Подсказка о правильных ответах */
@@ -463,8 +470,7 @@
             <h2 class="result-title">Поздравляем с завершением теста!</h2>
             <p class="result-text" id="resultMessage"></p>
             
-            <!-- ЗДЕСЬ ИЗМЕНЕНИЕ: Кнопка теперь ведёт на hr-chat-after.html -->
-            <a href="hr-chat-after.html" class="btn btn-primary" id="realityBtn">Вернуться в реальность</a>
+            <button class="btn btn-primary" id="restartBtn">Пройти тест ещё раз</button>
             
             <!-- Бонусный мем -->
             <div class="result-bonus" id="resultBonus">
@@ -557,7 +563,7 @@
         const progressFill = document.getElementById('progressFill');
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
-        const realityBtn = document.getElementById('realityBtn');
+        const restartBtn = document.getElementById('restartBtn');
         const finalScore = document.getElementById('finalScore');
         const resultMessage = document.getElementById('resultMessage');
 
@@ -703,8 +709,27 @@
             resultMessage.textContent = message;
         }
 
-        // Убрал обработчик для restartBtn, так как кнопка теперь ссылка на другую страницу
-        // realityBtn - это ссылка <a>, поэтому не нужен обработчик клика
+        // Перезапуск теста
+        restartBtn.addEventListener('click', function() {
+            // Сброс состояния
+            currentQuestion = 0;
+            userAnswers = new Array(questions.length).fill(null);
+            score = 0;
+            testFinished = false;
+            
+            // Сброс проверенных ответов
+            questions.forEach(question => {
+                question.options.forEach(option => {
+                    option.checked = false;
+                });
+            });
+            
+            // Показываем первый вопрос
+            questionArea.style.display = 'block';
+            resultContainer.style.display = 'none';
+            showQuestion(0);
+            nextBtn.disabled = true; // Кнопка изначально отключена
+        });
     </script>
 </body>
 </html>
