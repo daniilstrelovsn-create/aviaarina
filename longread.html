@@ -1390,11 +1390,9 @@
 }
 
 /* ===== КОММЕНТАРИИ ЕГОРА МАЛИНИНА ===== */
-/* ===== КОММЕНТАРИИ ЕГОРА МАЛИНИНА ===== */
 .avatar-comment {
-  position: absolute;
-  left: 100%; /* Позиционируем справа от контейнера */
-  margin-left: 30px; /* Отступ от контейнера */
+  position: fixed; /* Меняем на fixed для позиционирования относительно окна */
+  right: 20px; /* Позиционируем от правого края */
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   z-index: 100;
@@ -1432,35 +1430,35 @@
 }
 
 /* Для очень маленьких мобильных устройств */
-/* @media (max-width: 699px) {
+@media (max-width: 699px) {
   .avatar-comment {
     display: none; /* Скрываем на очень маленьких экранах */
-  /* }
-} */ 
+  }
+}
 
 /* Для средних экранов (700px - 900px) */
-/* @media (min-width: 700px) and (max-width: 900px) {
+@media (min-width: 700px) and (max-width: 900px) {
   .avatar-comment {
-    margin-left: 15px;
+    right: 15px;
   }
   
   .avatar-img {
     width: 40px;
     height: 40px;
     border-width: 2px;
-  } */
+  }
   
-  /* .notification-badge {
+  .notification-badge {
     width: 18px;
     height: 18px;
     font-size: 9px;
   }
-} */
+}
 
 /* Для больших планшетов (901px - 1200px) */
-@media (min-width: 701px) and (max-width: 1200px) {
+@media (min-width: 901px) and (max-width: 1200px) {
   .avatar-comment {
-    margin-left: 20px;
+    right: 20px;
   }
   
   .avatar-img {
@@ -1477,7 +1475,7 @@
 /* Для десктопов (1201px - 1400px) */
 @media (min-width: 1201px) and (max-width: 1400px) {
   .avatar-comment {
-    margin-left: 25px;
+    right: 25px;
   }
   
   .avatar-img {
@@ -1489,7 +1487,7 @@
 /* Для больших экранов (1401px - 1600px) */
 @media (min-width: 1401px) and (max-width: 1600px) {
   .avatar-comment {
-    margin-left: 30px;
+    right: 30px;
   }
   
   .avatar-img {
@@ -1501,7 +1499,7 @@
 /* Для очень больших экранов (1601px+) */
 @media (min-width: 1601px) {
   .avatar-comment {
-    margin-left: 35px;
+    right: 35px;
   }
   
   .avatar-img {
@@ -3345,6 +3343,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 </body>
 </html>
+
 
 
 
