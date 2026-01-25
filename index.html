@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Инструкция — Drag & Drop</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=1200, initial-scale=1.0">
 
   <!-- Подключаем шрифты -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@700;800;900&display=swap" rel="stylesheet">
@@ -1383,10 +1383,331 @@
   margin-top: 64px;
   margin-bottom: 24px;
 }
+
+/* ===== КРУЖКИ-КОММЕНТАРИИ ЕГОРА МАЛИНИНА ===== */
+    .avatar-comment {
+      position: absolute;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      z-index: 100;
+    }
+
+    .avatar-comment:hover {
+      transform: scale(1.1);
+      /* -shadow: 0 4px 15px rgba(0, 0, 0, 0.3); */
+    }
+
+    .avatar-img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 3px solid white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      object-fit: cover;
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      width: 20px;
+      height: 20px;
+      background: #FF4757;
+      border-radius: 50%;
+      border: 2px solid white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: white;
+      font-weight: bold;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Индикатор клика */
+    .click-indicator {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(43, 108, 255, 0.9);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-family: 'Inter', sans-serif;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .avatar-comment:hover .click-indicator {
+      opacity: 1;
+    }
+
+    /* Выпадающее окно с комментарием */
+    .comment-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      width: 500px;
+      max-width: 90vw;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      z-index: 1001;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    .comment-popup.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .comment-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .comment-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #2B6CFF;
+    }
+
+    .comment-author {
+      flex: 1;
+    }
+
+    .comment-author h4 {
+      margin: 0 0 5px 0;
+      font-family: 'Noto Sans', sans-serif;
+      font-size: 18px;
+      color: #1f2937;
+    }
+
+    .comment-author p {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .comment-content {
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      color: #1f2937;
+      font-size: 16px;
+    }
+
+    .comment-close {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 5px;
+      height: 35px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #c2c2c2;
+      transition: all 0.3s ease;
+    }
+
+    .comment-close:hover {
+      background: #ffffff;
+      color: #ff4757;
+    }
+
+    .comment-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .comment-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Для мобильных устройств */
+    @media (max-width: 768px) {
+      .avatar-img {
+        width: 40px;
+        height: 40px;
+      }
+
+      .comment-popup {
+        padding: 20px;
+        width: 95vw;
+      }
+
+      .comment-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+      }
+
+      .comment-avatar {
+        width: 50px;
+        height: 50px;
+      }
+    }
+
+    /* Подсветка связанного текста */
+    .highlighted-text {
+      background: linear-gradient(120deg, rgba(43, 108, 255, 0.2) 0%, rgba(43, 108, 255, 0.1) 100%);
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .highlighted-text.active {
+      background: linear-gradient(120deg, rgba(255, 71, 87, 0.2) 0%, rgba(255, 71, 87, 0.1) 100%);
+      box-shadow: 0 0 0 2px rgba(255, 71, 87, 0.3);
+    }
   </style>
 </head>
 <body>
+
+  <!-- Оверлей для затемнения фона -->
+  <div class="comment-overlay" id="commentOverlay"></div>
+
+  <!-- Попапы с комментариями -->
+  <!-- Комментарий 1 -->
+  <div class="comment-popup" id="commentPopup1">
+    <button class="comment-close">×</button>
+    <div class="comment-header">
+      <img src="avatar.png" alt="Егор Малинин" class="comment-avatar">
+      <div class="comment-author">
+        <h4>Егор Малинин</h4>
+        <p>SMM-специалист Aviasales</p>
+      </div>
+    </div>
+    <div class="comment-content">
+      <p>Я был наслышан об Авиасейлс как о компании с большой свободой в этом плане — и слухи оказались правдой. Мне не приходится выверять каждое слово и утверждать каждый креатив с какими-то вышестоящими «дяденьками в костюмах», и это круто.</p>
+    </div>
+  </div>
+
+  <!-- Комментарий 2 -->
+  <div class="comment-popup" id="commentPopup2">
+    <button class="comment-close">×</button>
+    <div class="comment-header">
+      <img src="avatar.png" alt="Егор Малинин" class="comment-avatar">
+      <div class="comment-author">
+        <h4>Егор Малинин</h4>
+        <p>SMM-специалист Aviasales</p>
+      </div>
+    </div>
+    <div class="comment-content">
+      <p>TikTok так устроен, что если ты заходишь в тренд через пару дней после его появления, то ты уже «ничтожество», кринж, и вообще до тебя всё медленно доходит. Поэтому мы довольно внимательно относимся к «возрасту» тренда, чтобы не подставляться под нож аудитории.</p>
+      <p>В Twitter кто-то однажды сказал: «Если компания использовала мем — он умер». Однако можно сказать, что мы — исключение из этого правила, поскольку не согласовываем тренды или мемы неделями, а выпускаем контент сразу после того, как придумали идею.</p>
+    </div>
+  </div>
+
+  <!-- Комментарий 3 -->
+  <div class="comment-popup" id="commentPopup3">
+    <button class="comment-close">×</button>
+    <div class="comment-header">
+      <img src="avatar.png" alt="Егор Малинин" class="comment-avatar">
+      <div class="comment-author">
+        <h4>Егор Малинин</h4>
+        <p>SMM-специалист Aviasales</p>
+      </div>
+    </div>
+    <div class="comment-content">
+      <p>У нас одна команда из шести человек, и каждый отвечает за 2–3 соцсети. При этом у нас нет жёсткого разделения по форматам: если ты занимаешься видеоконтентом, это не значит, что ты не можешь сделать мем или написать пост. Если есть желание и вдохновение — почему бы не написать что-нибудь интересное?</p>
+    </div>
+  </div>
+
+  <!-- Комментарий 4 -->
+  <div class="comment-popup" id="commentPopup4">
+    <button class="comment-close">×</button>
+    <div class="comment-header">
+      <img src="avatar.png" alt="Егор Малинин" class="comment-avatar">
+      <div class="comment-author">
+        <h4>Егор Малинин</h4>
+        <p>SMM-специалист Aviasales</p>
+      </div>
+    </div>
+    <div class="comment-content">
+      <p>Сложно ли было перестроиться на такой стиль написания постов? Первые мои посты приходилось полностью перекраивать, потому что у меня никак не получалось уловить нужный tone of voice. Первые три месяца я каждый день писал по посту, и где-то к концу первого месяца стало получаться так, что на мои тексты уже не было комментариев или правок со стороны команды.</p>
+    </div>
+  </div>
+
+  <!-- Комментарий 5 -->
+  <div class="comment-popup" id="commentPopup5">
+    <button class="comment-close">×</button>
+    <div class="comment-header">
+      <img src="avatar.png" alt="Егор Малинин" class="comment-avatar">
+      <div class="comment-author">
+        <h4>Егор Малинин</h4>
+        <p>SMM-специалист Aviasales</p>
+      </div>
+    </div>
+    <div class="comment-content">
+      <p>У нас в команде на самом деле не у всех есть образование в маркетинге. Один парень всю жизнь работал на стройке, другой — в какой-то сфере, связанной с ядерной энергетикой, а я вообще окончил колледж по специальности системного администратора.</p>
+    </div>
+  </div>
     <div class="container">
+
+     <div class="container">
+    <!-- Кружок 1 рядом с первым комментарием -->
+    <div class="avatar-comment" data-comment="1" style="top: 250px; right: 530px;">
+      <img src="avatar.png" alt="Егор Малинин" class="avatar-img">
+      <div class="notification-badge">1</div>
+    </div>
+
+    <!-- Кружок 2 рядом со вторым комментарием -->
+    <div class="avatar-comment" data-comment="2" style="top: 450px; right: 530px;">
+      <img src="avatar.png" alt="Егор Малинин" class="avatar-img">
+      <div class="notification-badge">2</div>
+    </div>
+
+    <!-- Кружок 3 рядом с третьим комментарием -->
+    <div class="avatar-comment" data-comment="3" style="top: 1500px; right: 530px;">
+      <img src="avatar.png" alt="Егор Малинин" class="avatar-img">
+      <div class="notification-badge">3</div>
+    </div>
+
+    <!-- Кружок 4 рядом с четвертым комментарием -->
+    <div class="avatar-comment" data-comment="4" style="top: 5750px; right: 530px;">
+      <img src="avatar.png" alt="Егор Малинин" class="avatar-img">
+      <div class="notification-badge">4</div>
+    </div>
+
+    <!-- Кружок 5 рядом с пятым комментарием -->
+    <div class="avatar-comment" data-comment="5" style="top: 6000px; right: 530px;">
+      <img src="avatar.png" alt="Егор Малинин" class="avatar-img">
+      <div class="notification-badge">5</div>
+    </div>
+
 
     <h1>Инструкция</h1>
 
@@ -2562,16 +2883,101 @@ document.addEventListener('DOMContentLoaded', function() {
           });
       });
   });
+// ===== ФУНКЦИОНАЛ КОММЕНТАРИЕВ ЕГОРА МАЛИНИНА =====
+    document.addEventListener('DOMContentLoaded', function() {
+      const avatarComments = document.querySelectorAll('.avatar-comment');
+      const commentOverlay = document.getElementById('commentOverlay');
+      const highlightedTexts = document.querySelectorAll('.highlighted-text');
+      const closeButtons = document.querySelectorAll('.comment-close');
+      let activePopup = null;
 
-  // Кнопка "Вернуться в реальность"
-  const backToRealityBtn = document.querySelector('.back-to-reality-btn');
-  if (backToRealityBtn) {
-    backToRealityBtn.addEventListener('click', function() {
-      alert('Возвращаемся в реальность!');
-      // Здесь можно добавить логику для перехода на другую страницу или действия
-      // window.location.href = 'index.html'; // например
+      // Функция открытия комментария
+      function openComment(commentNumber) {
+        // Закрываем предыдущий попап
+        if (activePopup) {
+          activePopup.classList.remove('active');
+        }
+        
+        // Открываем новый попап
+        const popup = document.getElementById(`commentPopup${commentNumber}`);
+        if (popup) {
+          popup.classList.add('active');
+          activePopup = popup;
+          commentOverlay.classList.add('active');
+          
+          // Подсвечиваем связанный текст
+          highlightedTexts.forEach(text => {
+            text.classList.remove('active');
+            if (text.dataset.comment === commentNumber) {
+              text.classList.add('active');
+              
+              // Прокручиваем к подсвеченному тексту
+              setTimeout(() => {
+                text.scrollIntoView({
+                  behavior: 'smooth',
+                  block: 'center'
+                });
+              }, 300);
+            }
+          });
+        }
+      }
+
+      // Функция закрытия комментария
+      function closeComment() {
+        if (activePopup) {
+          activePopup.classList.remove('active');
+          activePopup = null;
+        }
+        commentOverlay.classList.remove('active');
+        
+        // Убираем подсветку с текста
+        highlightedTexts.forEach(text => {
+          text.classList.remove('active');
+        });
+      }
+
+      // Назначаем обработчики на кружки-аватарки
+      avatarComments.forEach(comment => {
+        comment.addEventListener('click', function() {
+          const commentNumber = this.dataset.comment;
+          openComment(commentNumber);
+        });
+      });
+
+      // Назначаем обработчики на подсвеченный текст
+      highlightedTexts.forEach(text => {
+        text.addEventListener('click', function() {
+          const commentNumber = this.dataset.comment;
+          openComment(commentNumber);
+        });
+      });
+
+      // Назначаем обработчики на кнопки закрытия
+      closeButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+          e.stopPropagation(); // Останавливаем всплытие события
+          closeComment();
+        });
+      });
+
+      // Закрытие по клику на оверлей
+      commentOverlay.addEventListener('click', closeComment);
+
+      // Закрытие по нажатию Escape
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          closeComment();
+        }
+      });
+
+      // Предотвращаем закрытие при клике внутри попапа
+      document.querySelectorAll('.comment-popup').forEach(popup => {
+        popup.addEventListener('click', function(e) {
+          e.stopPropagation();
+        });
+      });
     });
-  }
 </script>
 
 </body>
