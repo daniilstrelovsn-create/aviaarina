@@ -128,6 +128,9 @@
             flex-shrink: 0; /* Не сжимается */
         }
 
+        .question-text {
+            /* Текст внутри контейнера */
+        }
 
         /* Варианты ответов */
         .options-container {
@@ -470,7 +473,8 @@
             <h2 class="result-title">Поздравляем с завершением теста!</h2>
             <p class="result-text" id="resultMessage"></p>
             
-            <button class="btn btn-primary" id="restartBtn">Пройти тест ещё раз</button>
+            <!-- ЗДЕСЬ ИЗМЕНЕНИЕ: Кнопка теперь ведёт на hr-chat-after.html -->
+            <a href="hr-chat-after.html" class="btn btn-primary" id="realityBtn">Вернуться в реальность</a>
             
             <!-- Бонусный мем -->
             <div class="result-bonus" id="resultBonus">
@@ -563,7 +567,7 @@
         const progressFill = document.getElementById('progressFill');
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
-        const restartBtn = document.getElementById('restartBtn');
+        const realityBtn = document.getElementById('realityBtn');
         const finalScore = document.getElementById('finalScore');
         const resultMessage = document.getElementById('resultMessage');
 
@@ -709,27 +713,8 @@
             resultMessage.textContent = message;
         }
 
-        // Перезапуск теста
-        restartBtn.addEventListener('click', function() {
-            // Сброс состояния
-            currentQuestion = 0;
-            userAnswers = new Array(questions.length).fill(null);
-            score = 0;
-            testFinished = false;
-            
-            // Сброс проверенных ответов
-            questions.forEach(question => {
-                question.options.forEach(option => {
-                    option.checked = false;
-                });
-            });
-            
-            // Показываем первый вопрос
-            questionArea.style.display = 'block';
-            resultContainer.style.display = 'none';
-            showQuestion(0);
-            nextBtn.disabled = true; // Кнопка изначально отключена
-        });
+        // Убрал обработчик для restartBtn, так как кнопка теперь ссылка на другую страницу
+        // realityBtn - это ссылка <a>, поэтому не нужен обработчик клика
     </script>
 </body>
 </html>
